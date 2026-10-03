@@ -60,13 +60,13 @@ details{border-top:1px solid var(--line);padding:8px 0}summary{cursor:pointer;fo
 <script>
 const K='schoolhouse_v2',$=s=>document.querySelector(s),uid=()=>Math.random().toString(36).slice(2,8);
 const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const TODAY='2026-10-02',IC={assignment,test,link,page,folder:};
+const TODAY='2026-10-02',IC={assignment:'📝',test:'🧪',link:'🔗',page:'📄',folder:'📁'};
 function seed(){const nm=['Alex Rivera','Bea Okafor','Cam Nguyen','Dara Patel','Eli Brooks','Fay Morales'],ids=nm.map((n,i)=>'s'+(i+1));
 const users=[{id:'a1',name:'Principal Hayes',role:'admin'},{id:'t1',name:'Ms. Carter',role:'teacher'},...nm.map((n,i)=>({id:ids[i],name:n,role:'student'}))];
 const mk=(n,sec,col,items)=>({id:uid(),name:n,sec,col,teacher:'t1',enrolled:ids.slice(),updates:[{id:uid(),text:'Welcome to the course!',time:TODAY}],items});
 const c1=mk('Algebra I','Period 2','#2b6be0',[{id:uid(),type:'assignment',title:'Chapter 3 homework',due:'2026-10-09',pts:10,text:'Do problems 1-20.'},{id:uid(),type:'link',title:'Khan Academy: slope',url:'https://www.khanacademy.org'},{id:uid(),type:'test',title:'Linear equations quiz',due:'2026-10-12',questions:[{t:'mc',q:'Slope of y = 3x + 2?',opts:['2','3','5'],a:'3'},{t:'tf',q:'A line can have two y-intercepts.',opts:['True','False'],a:'False'},{t:'sa',q:'Solve 2x = 10. x = ?',opts:[],a:'5'}]}]);
 const c2=mk('English 9','Period 4','#d4572a',[{id:uid(),type:'page',title:'Syllabus',text:'Reading, response journals, one essay per unit.'},{id:uid(),type:'assignment',title:'Reading response: Ch. 5',due:'2026-10-06',pts:15,text:'One page.'}]);
-return{school:{name:'Tundra Secondary School',color:'#17325f'},users,courses:[c1,c2],groups:[{id:uid(),name:'Robotics Club',members:['s1','s2','s3'],posts:[{id:uid(),by:'t1',text:'First meeting is Thursday!',time:TODAY}]}],sub:{}}}
+return{school:{name:'🏫 Schoolhouse',color:'#17325f'},users,courses:[c1,c2],groups:[{id:uid(),name:'Robotics Club',members:['s1','s2','s3'],posts:[{id:uid(),by:'t1',text:'First meeting is Thursday!',time:TODAY}]}],sub:{}}}
 let S;try{S=JSON.parse(localStorage.getItem(K))}catch(e){}if(!S)S=seed();
 const save=()=>{try{localStorage.setItem(K,JSON.stringify(S))}catch(e){}pushDb()};
 fix();
