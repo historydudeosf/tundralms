@@ -770,7 +770,7 @@
       }
       function admin() {
         const T = S.users.filter((u) => u.role !== "student");
-        return `<h2>Admin</h2>${U.msg ? `<p class="bad">${esc(U.msg)}</p>` : ""}<div class="card"><h3>School</h3><div class="row"><input value="${esc(S.school.name)}" aria-label="School name" onchange="S.school.name=this.value;save();render()"><label>Theme <input type="color" value="${S.school.color}" onchange="S.school.color=this.value;save();render()"></label><label class="mut">Logo <input type="file" accept="image/*" aria-label="School logo" onchange="setLogo(this)"></label>${S.school.logo ? `<button class="btn x" onclick="delete S.school.logo;save();render()">Use default logo</button>` : ""}<button class="btn x" style="color:var(--ink)" onclick="splash()">Preview animation</button></div></div>${lpAdmin()}${scaleAdmin()}
+        return `<h2>Admin</h2>${U.msg ? `<p class="bad">${esc(U.msg)}</p>` : ""}<div class="card"><h3>School</h3><div class="row"><input value="${esc(S.school.name)}" aria-label="School name" onchange="S.school.name=this.value;save();render()"><label>Theme <input type="color" value="${S.school.color}" onchange="S.school.color=this.value;save();render()"></label><label class="mut">Logo <input type="file" accept="image/*" aria-label="School logo" onchange="setLogo(this)"></label>${S.school.logo ? `<button class="btn x" onclick="delete S.school.logo;save();render()">Use default logo</button>` : ""}<button class="btn x" style="color:var(--ink)" onclick="splash()">Preview animation</button></div></div>${lpAdmin()}${scaleAdmin()}${googleCheckCard()}
 <div class="card"><h3>Users</h3>${S.users.map((u) => `<div class="item"><input value="${esc(u.name)}" aria-label="Name" onchange="edit('users','${u.id}','name',this.value)"><input value="${esc(u.un)}" aria-label="Username" placeholder="username" onchange="setUn('${u.id}',this.value)"><input value="${esc(u.pw)}" aria-label="Password" placeholder="password" onchange="edit('users','${u.id}','pw',this.value)"><input value="${esc(u.email || "")}" aria-label="Google email" placeholder="Google email (optional)" onchange="edit('users','${u.id}','email',this.value.trim())"><select aria-label="Role" onchange="edit('users','${u.id}','role',this.value)">${["admin", "teacher", "student"].map((r) => `<option${u.role === r ? " selected" : ""}>${r}</option>`).join("")}</select><button class="btn x" onclick="del('users','${u.id}')">Remove</button></div>`).join("")}
 <div class="row"><input id="un" placeholder="Name"><input id="uu" placeholder="Username"><input id="up" placeholder="Password"><input id="uem" placeholder="Google email (optional)"><select id="ur"><option>student</option><option>teacher</option><option>admin</option></select><button class="btn" onclick="addUser()">Add user</button></div></div>
 <div class="card"><h3>Courses</h3>${S.courses.map((c) => `<details><summary>${esc(c.name)}</summary><div class="row"><input value="${esc(c.name)}" aria-label="Course name" onchange="edit('courses','${c.id}','name',this.value)"><input value="${esc(c.sec)}" aria-label="Section" onchange="edit('courses','${c.id}','sec',this.value)"><input type="color" value="${c.col}" aria-label="Color" onchange="edit('courses','${c.id}','col',this.value)"><select aria-label="Teacher" onchange="edit('courses','${c.id}','teacher',this.value)">${T.map((t) => `<option value="${t.id}"${c.teacher === t.id ? " selected" : ""}>${esc(t.name)}</option>`).join("")}</select><button class="btn x" onclick="del('courses','${c.id}')">Delete</button></div><div class="row"><button class="btn" onclick="pick('courses','${c.id}','enrolled','students','Add students')">Edit enrolled students (${c.enrolled.length})</button></div></details>`).join("")}
@@ -1992,6 +1992,23 @@ ${low}<div class="row"><input id="sl" placeholder="Letter (e.g. A+)" style="widt
         l.removeAttribute("type");
         const h = logo();
         if (l.getAttribute("href") !== h) l.setAttribute("href", h);
+      }
+      function googleCheckCard() {
+        if (!CONFIG.googleClientId)
+          return '<div class="card"><h3>Google check</h3><p class="mut">Google Drive is off. Fill in googleClientId, googleApiKey and googleAppId in config.js to turn it on.</p></div>';
+        const num = String(CONFIG.googleClientId).split("-")[0],
+          app = String(CONFIG.googleAppId || ""),
+          k = String(CONFIG.googleApiKey || ""),
+          o = location.origin,
+          row = (ok, t) =>
+            `<div class="item"><span class="${ok ? "ok" : "bad"}">${ok ? "✓" : "✗"}</span><div>${t}</div></div>`;
+        return `<div class="card"><h3>Google check</h3><p class="mut">What this site is sending to Google.</p>
+${row(/^\d+$/.test(app), "googleAppId is <b>" + esc(app || "(empty)") + "</b>. It must be digits only (the project number).")}
+${row(app === num, "The project number inside your client ID is <b>" + esc(num) + "</b>" + (app === num ? ", which matches." : ". googleAppId should be exactly this."))}
+${row(/^AIza[\w-]{35}$/.test(k), "API key: <b>" + esc(k ? k.slice(0, 6) + "…" + k.slice(-4) : "(empty)") + "</b> (" + k.length + " characters, normal is 39). Compare the ending with the key in Google Cloud.")}
+${row(location.protocol === "https:" || location.hostname === "localhost", "This site is at <b>" + esc(o) + "</b>")}
+<p class="mut">API key → Websites restriction must be <b>${esc(o)}/*</b>. OAuth client → Authorized JavaScript origins must be <b>${esc(o)}</b> (no star, no slash).</p>
+<p class="mut">If the picker still says the developer key is invalid: confirm in Google Cloud that this key lives in project number ${esc(num)}, that Google Picker API is enabled there, and that the key's API restriction includes Google Picker API. Changes can take up to 10 minutes to apply.</p></div>`;
       }
       function fail(e) {
         console.error(e);
