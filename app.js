@@ -112,7 +112,7 @@ const vis = () =>
     (c) => U.role === "admin" || (U.role === "teacher" ? c.teacher === me().id : c.enrolled.includes(me().id)),
   );
 const hasG = (g) => g !== undefined && g !== "";
-const ltr = (p) => (p == null ? "–" : p >= 90 ? "A" : p >= 80 ? "B" : p >= 70 ? "C" : p >= 60 ? "D" : "F"),
+const ltr = (p) => (p == null ? "–" : gradeLetter(p)),
   fmt = (p) => (p == null ? "No grades yet" : p + "% (" + ltr(p) + ")");
 const go = (v, c, t) => {
   U.view = v;
@@ -250,7 +250,7 @@ function grades() {
 }
 function admin() {
   const T = S.users.filter((u) => u.role !== "student");
-  return `<h2>Admin</h2>${U.msg ? `<p class="bad">${esc(U.msg)}</p>` : ""}<div class="card"><h3>School</h3><div class="row"><input value="${esc(S.school.name)}" aria-label="School name" onchange="S.school.name=this.value;save();render()"><label>Theme <input type="color" value="${S.school.color}" onchange="S.school.color=this.value;save();render()"></label><label class="mut">Logo <input type="file" accept="image/*" aria-label="School logo" onchange="setLogo(this)"></label>${S.school.logo ? `<button class="btn x" onclick="delete S.school.logo;save();render()">Use default logo</button>` : ""}<button class="btn x" style="color:var(--ink)" onclick="splash()">Preview animation</button></div></div>${lpAdmin()}
+  return `<h2>Admin</h2>${U.msg ? `<p class="bad">${esc(U.msg)}</p>` : ""}<div class="card"><h3>School</h3><div class="row"><input value="${esc(S.school.name)}" aria-label="School name" onchange="S.school.name=this.value;save();render()"><label>Theme <input type="color" value="${S.school.color}" onchange="S.school.color=this.value;save();render()"></label><label class="mut">Logo <input type="file" accept="image/*" aria-label="School logo" onchange="setLogo(this)"></label>${S.school.logo ? `<button class="btn x" onclick="delete S.school.logo;save();render()">Use default logo</button>` : ""}<button class="btn x" style="color:var(--ink)" onclick="splash()">Preview animation</button></div></div>${lpAdmin()}${scaleAdmin()}
 <div class="card"><h3>Users</h3>${S.users.map((u) => `<div class="item"><input value="${esc(u.name)}" aria-label="Name" onchange="edit('users','${u.id}','name',this.value)"><input value="${esc(u.un)}" aria-label="Username" placeholder="username" onchange="setUn('${u.id}',this.value)"><input value="${esc(u.pw)}" aria-label="Password" placeholder="password" onchange="edit('users','${u.id}','pw',this.value)"><select aria-label="Role" onchange="edit('users','${u.id}','role',this.value)">${["admin", "teacher", "student"].map((r) => `<option${u.role === r ? " selected" : ""}>${r}</option>`).join("")}</select><button class="btn x" onclick="del('users','${u.id}')">Remove</button></div>`).join("")}
 <div class="row"><input id="un" placeholder="Name"><input id="uu" placeholder="Username"><input id="up" placeholder="Password"><select id="ur"><option>student</option><option>teacher</option><option>admin</option></select><button class="btn" onclick="addUser()">Add user</button></div></div>
 <div class="card"><h3>Courses</h3>${S.courses.map((c) => `<details><summary>${esc(c.name)}</summary><div class="row"><input value="${esc(c.name)}" aria-label="Course name" onchange="edit('courses','${c.id}','name',this.value)"><input value="${esc(c.sec)}" aria-label="Section" onchange="edit('courses','${c.id}','sec',this.value)"><input type="color" value="${c.col}" aria-label="Color" onchange="edit('courses','${c.id}','col',this.value)"><select aria-label="Teacher" onchange="edit('courses','${c.id}','teacher',this.value)">${T.map((t) => `<option value="${t.id}"${c.teacher === t.id ? " selected" : ""}>${esc(t.name)}</option>`).join("")}</select><button class="btn x" onclick="del('courses','${c.id}')">Delete</button></div><div class="row"><button class="btn" onclick="pick('courses','${c.id}','enrolled','students','Add students')">Edit enrolled students (${c.enrolled.length})</button></div></details>`).join("")}
@@ -270,13 +270,6 @@ function postG(g) {
   const t = v("#gp");
   if (!t) return;
   S.groups.find((x) => x.id === g).posts.push({ id: uid(), by: me().id, text: t, time: TODAY });
-  save();
-  render();
-}
-function turnIn(c, i) {
-  const t = v("#sb");
-  if (!t) return;
-  S.sub[c + ":" + i + ":" + me().id] = { text: t, grade: "" };
   save();
   render();
 }
@@ -636,49 +629,11 @@ try {
   U.user = sessionStorage.getItem("lms_user");
 } catch (e) {}
 let DB = null,
-  lastJ = "",
-  tm = 0;
-function pushDb() {
-  if (!DB) return;
-  clearTimeout(tm);
-  tm = setTimeout(() => {
-    const j = JSON.stringify(S);
-    if (j === lastJ) return;
-    lastJ = j;
-    DB.set({ json: j }).catch(() => {});
-  }, 400);
-}
-async function initDb() {
-  try {
-    const db = await claude.use("db");
-    if (!db) return;
-    DB = db.doc("lms/state");
-    DB.onSnapshot(
-      (snap) => {
-        if (snap.exists) {
-          const j = snap.data().json;
-          if (j === lastJ) return;
-          lastJ = j;
-          try {
-            const o = JSON.parse(j);
-            if (!o || !o.users || !o.courses || !o.groups || !o.school || !o.sub) return;
-            S = o;
-            fix();
-          } catch (e) {
-            return;
-          }
-          const a = document.activeElement;
-          if (a && /INPUT|TEXTAREA|SELECT/.test(a.tagName)) return;
-          render();
-        } else if (!snap.metadata.fromCache) {
-          lastJ = JSON.stringify(S);
-          DB.set({ json: lastJ }).catch(() => {});
-        }
-      },
-      () => {},
-    );
-  } catch (e) {}
-}
+  last = {},
+  ts = {},
+  tm = 0,
+  loaded = false,
+  seeded = false;
 function brand() {
   document.documentElement.style.setProperty("--nav", S.school.color);
   $("#sn").innerHTML =
@@ -856,6 +811,234 @@ function setLoginBg(inp) {
   };
   rd.readAsDataURL(f);
 }
+const lsSave = () => {
+  try {
+    localStorage.setItem(K, JSON.stringify(S));
+  } catch (e) {}
+};
+const subSid = (k) => k.split(":")[2];
+function pushDb() {
+  if (!DB) return;
+  clearTimeout(tm);
+  tm = setTimeout(commit, 400);
+}
+async function commitNow() {
+  clearTimeout(tm);
+  return commit();
+}
+async function commit() {
+  if (!DB) return true;
+  const w = [],
+    keys = [],
+    { sub, ...rest } = S,
+    cj = JSON.stringify(rest);
+  if (staff() && cj !== last.core) {
+    last.core = cj;
+    ts.core = Date.now();
+    keys.push("core");
+    w.push(DB.doc("lms/core").set({ json: cj, ts: ts.core }));
+  }
+  const by = {};
+  Object.keys(S.sub).forEach((k) => ((by[subSid(k)] = by[subSid(k)] || {})[k] = S.sub[k]));
+  Object.keys(last).forEach((k) => {
+    if (k.startsWith("sub_") && !by[k.slice(4)]) by[k.slice(4)] = {};
+  });
+  for (const sid in by) {
+    const key = "sub_" + sid,
+      j = JSON.stringify(by[sid]);
+    if (j !== last[key] && (staff() || sid === U.user)) {
+      last[key] = j;
+      ts[key] = Date.now();
+      keys.push(key);
+      w.push(DB.doc("lms/" + key).set({ json: j, ts: ts[key] }));
+    }
+  }
+  const res = await Promise.allSettled(w);
+  let ok = true;
+  res.forEach((r, n) => {
+    if (r.status === "rejected") {
+      ok = false;
+      delete last[keys[n]];
+    }
+  });
+  if (!ok)
+    note(
+      "Not saved to the shared database. Your account may be view-only. Ask the course owner for Contributor (edit) access.",
+    );
+  return ok;
+}
+function applyDoc(d) {
+  const id = d.id,
+    x = d.data();
+  if (!x || typeof x.json !== "string" || (x.ts || 0) < (ts[id] || 0) || x.json === last[id === "core" ? "core" : id])
+    return;
+  try {
+    const o = JSON.parse(x.json);
+    if (id === "core") {
+      if (!o || !o.users || !o.courses || !o.groups || !o.school) return;
+      o.sub = S.sub || {};
+      S = o;
+      fix();
+      last.core = x.json;
+    } else if (id.startsWith("sub_")) {
+      const sid = id.slice(4);
+      Object.keys(S.sub).forEach((k) => {
+        if (subSid(k) === sid) delete S.sub[k];
+      });
+      Object.assign(S.sub, o);
+      last[id] = x.json;
+    } else return;
+    ts[id] = x.ts || 0;
+  } catch (e) {}
+}
+async function initDb() {
+  try {
+    const db = await claude.use("db");
+    if (!db) return;
+    DB = db;
+    db.collection("lms").onSnapshot(
+      (snap) => {
+        const hasCore = snap.docs.some((d) => d.id === "core"),
+          legacy = snap.docs.find((d) => d.id === "state");
+        if (hasCore && !loaded) {
+          loaded = true;
+          S.sub = {};
+        }
+        snap.docs.forEach(applyDoc);
+        if (!hasCore && !snap.metadata.fromCache && !seeded) {
+          seeded = true;
+          if (legacy) {
+            try {
+              const o = JSON.parse(legacy.data().json);
+              if (o && o.users && o.courses) {
+                S = o;
+                fix();
+              }
+            } catch (e) {}
+          }
+          commit();
+        }
+        lsSave();
+        const a = document.activeElement;
+        if (a && /INPUT|TEXTAREA|SELECT/.test(a.tagName)) return;
+        render();
+      },
+      () => {},
+    );
+  } catch (e) {}
+}
+function note(m) {
+  let t = $("#toast");
+  if (!t) {
+    t = document.createElement("div");
+    t.id = "toast";
+    t.setAttribute("role", "alert");
+    t.style.cssText =
+      "position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:#c23a3a;color:#fff;padding:10px 16px;border-radius:8px;z-index:60;max-width:90vw;box-shadow:0 6px 18px rgba(0,0,0,.3)";
+    document.body.appendChild(t);
+  }
+  t.textContent = m;
+  clearTimeout(t._h);
+  t._h = setTimeout(() => t.remove(), 9000);
+}
+async function putSub(key, val) {
+  S.sub[key] = val;
+  lsSave();
+  const ok = await commitNow();
+  if (!ok) {
+    delete S.sub[key];
+    lsSave();
+    note(
+      "Your work was NOT sent to your teacher. Your account may be view-only. Ask for Contributor (edit) access, then try again.",
+    );
+  }
+  render();
+}
+async function takeTest(c, id) {
+  const sid = me().id;
+  if (U.busy || sg(c, id, sid).ans) return;
+  U.busy = true;
+  try {
+    const i = C(c).items.find((x) => x.id === id);
+    const ans = i.questions.map((q, n) => {
+      if (q.t === "ms") return [...document.querySelectorAll(`input[name=q${n}]:checked`)].map((x) => x.value);
+      if (q.t === "mc" || q.t === "tf") {
+        const r = document.querySelector(`input[name=q${n}]:checked`);
+        return r ? r.value : "";
+      }
+      return document.querySelector(`[name=q${n}]`).value;
+    });
+    const award = i.questions.map((q, n) => auto(q, ans[n]));
+    await putSub(c + ":" + id + ":" + sid, { ans, award, grade: finalGrade(award) });
+  } finally {
+    U.busy = false;
+  }
+}
+async function turnIn(c, i) {
+  const t = v("#sb"),
+    sid = me().id;
+  if (!t || U.busy || sg(c, i, sid).text) return;
+  U.busy = true;
+  try {
+    await putSub(c + ":" + i + ":" + sid, { text: t, grade: "" });
+  } finally {
+    U.busy = false;
+  }
+}
+function retake(c, i, sid) {
+  delete S.sub[c + ":" + i + ":" + sid];
+  U.rev = null;
+  save();
+  render();
+}
+const DEFSCALE = [
+  { l: "A", min: 90 },
+  { l: "B", min: 80 },
+  { l: "C", min: 70 },
+  { l: "D", min: 60 },
+  { l: "F", min: 0 },
+];
+const scl = () => S.school.scale || (S.school.scale = DEFSCALE.map((x) => ({ ...x })));
+function gradeLetter(p) {
+  const sc = (S.school.scale && S.school.scale.length ? S.school.scale : DEFSCALE)
+      .slice()
+      .sort((a, b) => b.min - a.min),
+    f = sc.find((x) => p >= x.min);
+  return f ? f.l : sc[sc.length - 1].l;
+}
+function setScale(n, f, val) {
+  const s = scl();
+  if (f === "min") s[n].min = Math.max(0, Math.min(100, +val || 0));
+  else s[n].l = val.trim() || s[n].l;
+  s.sort((a, b) => b.min - a.min);
+  save();
+  render();
+}
+function addScale() {
+  const l = v("#sl"),
+    m = $("#sm").value;
+  if (!l || m === "") return;
+  scl().push({ l, min: Math.max(0, Math.min(100, +m || 0)) });
+  scl().sort((a, b) => b.min - a.min);
+  save();
+  render();
+}
+function delScale(n) {
+  const s = scl();
+  if (s.length > 1) s.splice(n, 1);
+  save();
+  render();
+}
+function scaleAdmin() {
+  const s = (S.school.scale || DEFSCALE).slice().sort((a, b) => b.min - a.min);
+  const low =
+    s[s.length - 1].min > 0
+      ? '<p class="bad">No row starts at 0%, so very low grades will show the lowest letter.</p>'
+      : "";
+  return `<div class="card"><h3>Grading scale</h3><p class="mut">A student gets the first letter whose minimum percentage they reach.</p>
+${s.map((x, n) => `<div class="item"><input value="${esc(x.l)}" style="width:80px" aria-label="Letter grade" onchange="setScale(${n},'l',this.value)"><label>from <input type="number" min="0" max="100" value="${x.min}" style="width:80px" aria-label="Minimum percent" onchange="setScale(${n},'min',this.value)"> %</label><button class="btn x" onclick="delScale(${n})">Remove</button></div>`).join("")}
+${low}<div class="row"><input id="sl" placeholder="Letter (e.g. A+)" style="width:130px"><input id="sm" type="number" min="0" max="100" placeholder="Min %" style="width:90px"><button class="btn" onclick="addScale()">Add grade</button><button class="btn x" onclick="delete S.school.scale;save();render()">Reset to A–F</button></div></div>`;
+}
 function fail(e) {
   console.error(e);
   $("#main").innerHTML =
@@ -868,10 +1051,8 @@ async function resetAll() {
   } catch (e) {}
   S = seed();
   fix();
-  if (DB)
-    try {
-      await DB.set({ json: JSON.stringify(S) });
-    } catch (e) {}
+  last = {};
+  await commitNow();
   location.reload();
 }
 function render() {
@@ -1069,21 +1250,6 @@ function adj(c, id, sid, n, d) {
     x = awards(i, S.sub[c + ":" + id + ":" + sid])[n];
   setAward(c, id, sid, n, String((x || 0) + d));
 }
-function takeTest(c, id) {
-  const i = C(c).items.find((x) => x.id === id);
-  const ans = i.questions.map((q, n) => {
-    if (q.t === "ms") return [...document.querySelectorAll(`input[name=q${n}]:checked`)].map((x) => x.value);
-    if (q.t === "mc" || q.t === "tf") {
-      const r = document.querySelector(`input[name=q${n}]:checked`);
-      return r ? r.value : "";
-    }
-    return document.querySelector(`[name=q${n}]`).value;
-  });
-  const award = i.questions.map((q, n) => auto(q, ans[n]));
-  S.sub[c + ":" + id + ":" + me().id] = { ans, award, grade: finalGrade(award) };
-  save();
-  render();
-}
 function testView(c, i, sb) {
   const tot = pts(i);
   let h = `<p class="mut">${i.questions.length} question${plural(i.questions.length)} · ${tot} point${plural(tot)}</p>`;
@@ -1102,7 +1268,7 @@ function testView(c, i, sb) {
       .map((id) => {
         const s = sg(c.id, i.id, id);
         const right = s.ans
-          ? `<span class="${hasG(s.grade) ? "" : "bad"}">${hasG(s.grade) ? s.grade + "/" + tot : "Needs grading"}</span><button class="btn" onclick="U.rev=U.rev==='${id}'?null:'${id}';render()">${U.rev === id ? "Close" : "Review"}</button>`
+          ? `<span class="${hasG(s.grade) ? "" : "bad"}">${hasG(s.grade) ? s.grade + "/" + tot : "Needs grading"}</span><button class="btn" onclick="U.rev=U.rev==='${id}'?null:'${id}';render()">${U.rev === id ? "Close" : "Review"}</button><button class="btn x" onclick="retake('${c.id}','${i.id}','${id}')">Allow retake</button>`
           : '<span class="mut">Not taken</span>';
         return `<div class="item"><b style="flex:1">${esc(nm(id))}</b>${right}</div>${U.rev === id && s.ans ? review(c, i, id) : ""}`;
       })
