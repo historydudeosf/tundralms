@@ -250,7 +250,7 @@ function grades() {
 }
 function admin() {
   const T = S.users.filter((u) => u.role !== "student");
-  return `<h2>Admin</h2>${U.msg ? `<p class="bad">${esc(U.msg)}</p>` : ""}<div class="card"><h3>School</h3><div class="row"><input value="${esc(S.school.name)}" aria-label="School name" onchange="S.school.name=this.value;save();render()"><label>Theme <input type="color" value="${S.school.color}" onchange="S.school.color=this.value;save();render()"></label><label class="mut">Logo <input type="file" accept="image/*" aria-label="School logo" onchange="setLogo(this)"></label>${S.school.logo ? `<button class="btn x" onclick="delete S.school.logo;save();render()">Use default logo</button>` : ""}<button class="btn x" style="color:var(--ink)" onclick="splash()">Preview animation</button></div></div>
+  return `<h2>Admin</h2>${U.msg ? `<p class="bad">${esc(U.msg)}</p>` : ""}<div class="card"><h3>School</h3><div class="row"><input value="${esc(S.school.name)}" aria-label="School name" onchange="S.school.name=this.value;save();render()"><label>Theme <input type="color" value="${S.school.color}" onchange="S.school.color=this.value;save();render()"></label><label class="mut">Logo <input type="file" accept="image/*" aria-label="School logo" onchange="setLogo(this)"></label>${S.school.logo ? `<button class="btn x" onclick="delete S.school.logo;save();render()">Use default logo</button>` : ""}<button class="btn x" style="color:var(--ink)" onclick="splash()">Preview animation</button></div></div>${lpAdmin()}
 <div class="card"><h3>Users</h3>${S.users.map((u) => `<div class="item"><input value="${esc(u.name)}" aria-label="Name" onchange="edit('users','${u.id}','name',this.value)"><input value="${esc(u.un)}" aria-label="Username" placeholder="username" onchange="setUn('${u.id}',this.value)"><input value="${esc(u.pw)}" aria-label="Password" placeholder="password" onchange="edit('users','${u.id}','pw',this.value)"><select aria-label="Role" onchange="edit('users','${u.id}','role',this.value)">${["admin", "teacher", "student"].map((r) => `<option${u.role === r ? " selected" : ""}>${r}</option>`).join("")}</select><button class="btn x" onclick="del('users','${u.id}')">Remove</button></div>`).join("")}
 <div class="row"><input id="un" placeholder="Name"><input id="uu" placeholder="Username"><input id="up" placeholder="Password"><select id="ur"><option>student</option><option>teacher</option><option>admin</option></select><button class="btn" onclick="addUser()">Add user</button></div></div>
 <div class="card"><h3>Courses</h3>${S.courses.map((c) => `<details><summary>${esc(c.name)}</summary><div class="row"><input value="${esc(c.name)}" aria-label="Course name" onchange="edit('courses','${c.id}','name',this.value)"><input value="${esc(c.sec)}" aria-label="Section" onchange="edit('courses','${c.id}','sec',this.value)"><input type="color" value="${c.col}" aria-label="Color" onchange="edit('courses','${c.id}','col',this.value)"><select aria-label="Teacher" onchange="edit('courses','${c.id}','teacher',this.value)">${T.map((t) => `<option value="${t.id}"${c.teacher === t.id ? " selected" : ""}>${esc(t.name)}</option>`).join("")}</select><button class="btn x" onclick="del('courses','${c.id}')">Delete</button></div><div class="row"><button class="btn" onclick="pick('courses','${c.id}','enrolled','students','Add students')">Edit enrolled students (${c.enrolled.length})</button></div></details>`).join("")}
@@ -685,8 +685,7 @@ function brand() {
     `<img src="${logo()}" alt="" style="height:30px;width:30px;object-fit:cover;border-radius:6px;vertical-align:middle;margin-right:8px">${esc(S.school.name)}`;
 }
 function login() {
-  const ad = S.users.some((u) => u.role === "admin" && u.pw === "admin");
-  return `<div class="card" style="max-width:380px;margin:40px auto;text-align:center"><img src="${logo()}" alt="" style="width:150px;height:auto;border-radius:12px"><h2 style="margin:8px 0 4px">${esc(S.school.name)}</h2><p class="mut">Sign in to continue</p><input id="lu" placeholder="Username" autocomplete="username" style="width:100%" onkeydown="if(event.key==='Enter')$('#lp').focus()"><input id="lp" type="password" placeholder="Password" autocomplete="current-password" style="width:100%;margin-top:8px" onkeydown="if(event.key==='Enter')signIn()">${U.msg ? `<p class="bad">${esc(U.msg)}</p>` : ""}<div class="row"><button class="btn" onclick="signIn()" style="width:100%">Sign in</button></div>${ad ? '<p class="mut">First time here? The admin account is username <b>admin</b>, password <b>admin</b>. Change it on the Admin page.</p>' : ""}</div>`;
+  return loginCard(false);
 }
 function signIn() {
   const un = v("#lu").toLowerCase(),
@@ -788,6 +787,75 @@ function del(k, id) {
   save();
   render();
 }
+const lpd = () =>
+  Object.assign(
+    { title: "", sub: "Sign in to continue", bg: "", bgImg: "", btn: "", cardBg: "", showLogo: true, foot: "" },
+    S.school.lp || {},
+  );
+function loginBgCss(o, fixed) {
+  return o.bgImg
+    ? `linear-gradient(rgba(0,0,0,.35),rgba(0,0,0,.35)),url('${o.bgImg}') center/cover${fixed ? " fixed" : ""}`
+    : o.bg || "";
+}
+function loginBg() {
+  document.body.style.background = loginBgCss(lpd(), true);
+}
+function loginCard(pre) {
+  const o = lpd(),
+    ad = !pre && S.users.some((u) => u.role === "admin" && u.pw === "admin"),
+    dis = pre ? " disabled" : "",
+    id = (x) => (pre ? "" : ` id="${x}"`);
+  let vars = "";
+  if (o.cardBg) {
+    const h = o.cardBg.replace("#", ""),
+      n = parseInt(h.length === 3 ? h.replace(/./g, "$&$&") : h, 16),
+      l = ((n >> 16) & 255) * 0.299 + ((n >> 8) & 255) * 0.587 + (n & 255) * 0.114;
+    vars =
+      `background:${o.cardBg};` +
+      (l > 150
+        ? "--ink:#1c2538;--mut:#667189;--bg:#eef1f6;--line:#dbe0ea;"
+        : "--ink:#e6eaf3;--mut:#94a0b8;--bg:#10151f;--line:#2c364b;");
+  }
+  return `<div class="card" style="max-width:380px;margin:${pre ? "0 auto" : "40px auto"};text-align:center;color:var(--ink);${vars}">${o.showLogo ? `<img src="${logo()}" alt="" style="width:150px;height:auto;border-radius:12px">` : ""}<h2 style="margin:8px 0 4px">${esc(o.title || S.school.name)}</h2><p class="mut">${esc(o.sub)}</p><input${id("lu")}${dis} placeholder="Username" autocomplete="username" style="width:100%" onkeydown="if(event.key==='Enter')$('#lp').focus()"><input${id("lp")}${dis} type="password" placeholder="Password" autocomplete="current-password" style="width:100%;margin-top:8px" onkeydown="if(event.key==='Enter')signIn()">${!pre && U.msg ? `<p class="bad">${esc(U.msg)}</p>` : ""}<div class="row"><button class="btn"${dis}${pre ? "" : ' onclick="signIn()"'} style="width:100%;${o.btn ? "background:" + o.btn + ";" : ""}">Sign in</button></div>${o.foot ? `<p class="mut">${esc(o.foot)}</p>` : ""}${ad ? '<p class="mut">First time here? The admin account is username <b>admin</b>, password <b>admin</b>. Change it on the Admin page.</p>' : ""}</div>`;
+}
+function lpAdmin() {
+  const o = lpd(),
+    f = (k, label, ph) =>
+      `<label class="mut" style="display:block;margin-top:8px">${label}<input value="${esc(o[k])}" placeholder="${esc(ph)}" style="width:100%" onchange="lpSet('${k}',this.value)"></label>`;
+  return `<div class="card"><h3>Login page</h3><div class="grid2"><div>${f("title", "Headline", "School name")}${f("sub", "Subtitle", "Sign in to continue")}${f("foot", "Footer note", "Optional")}
+<div class="row"><label>Background <input type="color" value="${o.bg || "#17325f"}" onchange="lpSet('bg',this.value)"></label><label>Button <input type="color" value="${o.btn || "#2b6be0"}" onchange="lpSet('btn',this.value)"></label><label>Card <input type="color" value="${o.cardBg || "#ffffff"}" onchange="lpSet('cardBg',this.value)"></label></div>
+<div class="row"><label class="mut">Background image <input type="file" accept="image/*" aria-label="Login background image" onchange="setLoginBg(this)"></label>${o.bgImg ? `<button class="btn x" onclick="lpSet('bgImg','')">Remove image</button>` : ""}</div>
+<div class="row"><label><input type="checkbox"${o.showLogo ? " checked" : ""} onchange="lpSet('showLogo',this.checked)"> Show logo</label><button class="btn x" onclick="S.school.lp={};save();render()">Reset to default</button></div></div>
+<div><div class="mut" style="margin-bottom:6px">Preview</div><div style="border-radius:10px;padding:16px;background:${loginBgCss(o) || "var(--bg)"};border:1px solid var(--line)">${loginCard(true)}</div></div></div></div>`;
+}
+function lpSet(k, v) {
+  S.school.lp = S.school.lp || {};
+  S.school.lp[k] = v;
+  save();
+  render();
+}
+function setLoginBg(inp) {
+  const f = inp.files[0];
+  if (!f) return;
+  const rd = new FileReader();
+  rd.onload = () => {
+    const im = new Image();
+    im.onload = () => {
+      const w = Math.min(1200, im.width),
+        h = Math.round((im.height * w) / im.width),
+        cv = document.createElement("canvas");
+      cv.width = w;
+      cv.height = h;
+      const x = cv.getContext("2d");
+      x.fillStyle = "#fff";
+      x.fillRect(0, 0, w, h);
+      x.drawImage(im, 0, 0, w, h);
+      lpSet("bgImg", cv.toDataURL("image/jpeg", 0.6));
+    };
+    im.src = rd.result;
+  };
+  rd.readAsDataURL(f);
+}
 function fail(e) {
   console.error(e);
   $("#main").innerHTML =
@@ -817,6 +885,7 @@ function renderMain() {
   if (U.user && !S.users.some((u) => u.id === U.user)) U.user = null;
   if (!U.user) {
     brand();
+    loginBg();
     $("#nav").innerHTML = "";
     $("#me").textContent = "";
     $("#so").hidden = true;
@@ -824,6 +893,7 @@ function renderMain() {
     $("#modal").innerHTML = "";
     return;
   }
+  document.body.style.background = "";
   U.role = S.users.find((u) => u.id === U.user).role;
   $("#so").hidden = false;
   renderApp();
