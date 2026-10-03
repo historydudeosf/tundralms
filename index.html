@@ -1,0 +1,2246 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Schoolhouse LMS</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg: #eef1f6;
+        --card: #fff;
+        --ink: #1c2538;
+        --mut: #667189;
+        --line: #dbe0ea;
+        --nav: #17325f;
+        --acc: #2b6be0;
+        --ok: #1b8a57;
+        --bad: #c23a3a;
+        box-sizing: border-box;
+        padding-top: env(safe-area-inset-top, 0px);
+        padding-bottom: env(safe-area-inset-bottom, 0px);
+      }
+      @media (prefers-color-scheme: dark) {
+        :root:not([data-theme="light"]) {
+          --bg: #10151f;
+          --card: #1a2130;
+          --ink: #e6eaf3;
+          --mut: #94a0b8;
+          --line: #2c364b;
+          --acc: #5b92f5;
+          --ok: #3cc28a;
+          --bad: #ef6b6b;
+        }
+      }
+      :root[data-theme="dark"] {
+        --bg: #10151f;
+        --card: #1a2130;
+        --ink: #e6eaf3;
+        --mut: #94a0b8;
+        --line: #2c364b;
+        --acc: #5b92f5;
+        --ok: #3cc28a;
+        --bad: #ef6b6b;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      html {
+        scroll-padding-top: env(safe-area-inset-top, 0px);
+      }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--ink);
+        font:
+          16px/1.45 "Source Sans 3",
+          system-ui,
+          sans-serif;
+      }
+      header {
+        background: var(--nav);
+        color: #fff;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        padding: 8px 16px;
+        position: sticky;
+        top: env(safe-area-inset-top, 0px);
+        z-index: 5;
+        flex-wrap: wrap;
+      }
+      header b {
+        font-size: 20px;
+        margin-right: 12px;
+      }
+      header .sp {
+        flex: 1;
+      }
+      header button {
+        background: none;
+        border: 0;
+        color: #dbe5fa;
+        padding: 8px 12px;
+        border-radius: 6px;
+        font: inherit;
+        cursor: pointer;
+      }
+      header button.on,
+      header button:hover {
+        background: rgba(255, 255, 255, 0.16);
+        color: #fff;
+      }
+      .role {
+        display: flex;
+        background: rgba(255, 255, 255, 0.14);
+        border-radius: 8px;
+        padding: 3px;
+      }
+      .role button {
+        padding: 4px 10px;
+      }
+      .role button.on {
+        background: #fff;
+        color: #17325f;
+      }
+      main {
+        max-width: 980px;
+        margin: 20px auto;
+        padding: 0 16px;
+      }
+      .card {
+        background: var(--card);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 16px;
+        margin-bottom: 14px;
+      }
+      h2 {
+        margin: 0 0 12px;
+        font-size: 22px;
+      }
+      h3 {
+        margin: 0 0 8px;
+        font-size: 17px;
+      }
+      .mut {
+        color: var(--mut);
+        font-size: 14px;
+      }
+      .grid2 {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 16px;
+      }
+      .courses {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+        gap: 14px;
+      }
+      .course {
+        cursor: pointer;
+        padding: 0;
+        overflow: hidden;
+      }
+      .course .bar {
+        height: 70px;
+      }
+      .course div + div {
+        padding: 12px 14px;
+      }
+      .banner {
+        color: #fff;
+        padding: 22px;
+        border-radius: 8px 8px 0 0;
+      }
+      .banner h2 {
+        margin: 0;
+      }
+      .tabs {
+        display: flex;
+        background: var(--card);
+        border: 1px solid var(--line);
+        border-top: 0;
+        border-radius: 0 0 8px 8px;
+        margin-bottom: 14px;
+        overflow-x: auto;
+      }
+      .tabs button {
+        background: none;
+        border: 0;
+        padding: 11px 16px;
+        font: inherit;
+        color: var(--mut);
+        cursor: pointer;
+        white-space: nowrap;
+        border-bottom: 3px solid transparent;
+      }
+      .tabs button.on {
+        color: var(--ink);
+        font-weight: 600;
+        border-color: var(--acc);
+      }
+      input,
+      select,
+      textarea {
+        font: inherit;
+        color: var(--ink);
+        background: var(--bg);
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        padding: 7px 9px;
+        max-width: 100%;
+      }
+      textarea {
+        width: 100%;
+        min-height: 64px;
+      }
+      input[type="color"] {
+        padding: 2px;
+        width: 44px;
+        height: 34px;
+      }
+      .btn {
+        background: var(--acc);
+        color: #fff;
+        border: 0;
+        border-radius: 6px;
+        padding: 8px 14px;
+        font: inherit;
+        font-weight: 600;
+        cursor: pointer;
+      }
+      .btn.x {
+        background: none;
+        color: var(--bad);
+        border: 1px solid var(--line);
+      }
+      .link {
+        background: none;
+        border: 0;
+        color: var(--acc);
+        cursor: pointer;
+        font: inherit;
+        padding: 0;
+      }
+      :focus-visible {
+        outline: 2px solid var(--acc);
+        outline-offset: 2px;
+      }
+      .row {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        align-items: center;
+        margin-top: 8px;
+      }
+      .item {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+        padding: 10px 0;
+        border-top: 1px solid var(--line);
+      }
+      .item:first-child {
+        border-top: 0;
+      }
+      .pill {
+        font-size: 13px;
+        padding: 2px 9px;
+        border-radius: 99px;
+        background: var(--bg);
+        border: 1px solid var(--line);
+      }
+      .ok {
+        color: var(--ok);
+      }
+      .bad {
+        color: var(--bad);
+      }
+      .menu {
+        position: relative;
+        display: inline-block;
+      }
+      .menu .dd {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        background: var(--card);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        min-width: 190px;
+        z-index: 4;
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.18);
+        padding: 4px;
+      }
+      .menu .dd button {
+        display: block;
+        width: 100%;
+        text-align: left;
+        background: none;
+        border: 0;
+        padding: 9px 12px;
+        font: inherit;
+        color: var(--ink);
+        cursor: pointer;
+        border-radius: 6px;
+      }
+      .menu .dd button:hover {
+        background: var(--bg);
+      }
+      .tw {
+        overflow-x: auto;
+      }
+      table {
+        border-collapse: collapse;
+        width: 100%;
+      }
+      th,
+      td {
+        padding: 8px 10px;
+        border-bottom: 1px solid var(--line);
+        text-align: left;
+        white-space: nowrap;
+      }
+      td input[type="number"] {
+        width: 64px;
+      }
+      details {
+        border-top: 1px solid var(--line);
+        padding: 8px 0;
+      }
+      summary {
+        cursor: pointer;
+        font-weight: 600;
+      }
+      .ov {
+        position: fixed;
+        inset: 0;
+        background: rgba(10, 16, 30, 0.55);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 20;
+        padding: 16px;
+      }
+      .dlg {
+        background: var(--card);
+        border-radius: 14px;
+        width: min(440px, 100%);
+        max-height: 80vh;
+        display: flex;
+        flex-direction: column;
+        padding: 20px;
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
+        gap: 8px;
+      }
+      .pls {
+        overflow-y: auto;
+        flex: 1;
+        min-height: 120px;
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        padding: 4px;
+        margin: 4px 0;
+      }
+      .pr {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        width: 100%;
+        background: none;
+        border: 0;
+        border-radius: 8px;
+        padding: 8px 10px;
+        font: inherit;
+        color: var(--ink);
+        cursor: pointer;
+      }
+      .pr:hover {
+        background: var(--bg);
+      }
+      .pr.on {
+        background: color-mix(in srgb, var(--acc) 14%, transparent);
+      }
+      .av {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        color: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 14px;
+        flex: none;
+      }
+      .ck {
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        border: 2px solid var(--line);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+        color: #fff;
+        flex: none;
+      }
+      .pr.on .ck {
+        background: var(--acc);
+        border-color: var(--acc);
+      }
+      .item {
+        flex-wrap: wrap;
+      }
+      .sp2 {
+        position: fixed;
+        inset: 0;
+        z-index: 50;
+        background: var(--nav);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 18px;
+        animation: sfade 3.2s forwards;
+      }
+      .sp2 .sl {
+        width: 200px;
+        border-radius: 22px;
+        background: #fff;
+        padding: 8px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+        animation: pop 0.9s cubic-bezier(0.2, 1.4, 0.4, 1) both;
+      }
+      .sp2 h1 {
+        color: #fff;
+        font-size: 34px;
+        margin: 0;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        padding: 0 16px;
+      }
+      .sp2 h1 span {
+        display: inline-block;
+        opacity: 0;
+        animation: rise 0.5s forwards;
+      }
+      @keyframes pop {
+        0% {
+          transform: scale(0.3) translateY(60px) rotate(-6deg);
+          opacity: 0;
+        }
+        100% {
+          transform: none;
+          opacity: 1;
+        }
+      }
+      @keyframes rise {
+        from {
+          opacity: 0;
+          transform: translateY(14px);
+        }
+        to {
+          opacity: 1;
+          transform: none;
+        }
+      }
+      @keyframes sfade {
+        0%,
+        80% {
+          opacity: 1;
+        }
+        100% {
+          opacity: 0;
+          visibility: hidden;
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .sp2 .sl,
+        .sp2 h1 span {
+          animation: none;
+          opacity: 1;
+        }
+      }
+      @media (max-width: 760px) {
+        .grid2 {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <b id="sn"></b><span id="nav" style="display: contents"></span><span class="sp"></span>
+      <span id="me" style="color: #c9d4ec; font-size: 14px"></span><button id="so" onclick="signOut()">Sign out</button>
+    </header>
+    <main id="main"></main>
+    <div id="modal"></div>
+    <script>
+      addEventListener("error", function (e) {
+        var m = document.getElementById("main");
+        if (m && !m.innerHTML.trim() && !m.getAttribute("data-err")) {
+          m.setAttribute("data-err", "1");
+          m.innerHTML =
+            '<div style="padding:20px;max-width:640px;margin:0 auto;font:16px system-ui,sans-serif;color:#c23a3a"><b>Something went wrong while loading.</b><pre style="white-space:pre-wrap">' +
+            String(e.message).replace(/</g, "&lt;") +
+            " (line " +
+            e.lineno +
+            ')</pre><button onclick="try{localStorage.clear();localStorage.clear()}catch(x){};location.reload()">Clear saved data and reload</button></div>';
+        }
+      });
+    </script>
+    <script>
+      /* ===== SETTINGS YOU CAN EDIT =====
+   To share accounts and data between computers (for example on GitHub Pages), create a free
+   Supabase project, run the SQL below in its SQL Editor, then paste your Project URL and anon key here.
+   Leave both empty to keep everything in this browser only.
+
+   create table lms_docs (id text primary key, json text not null, ts bigint not null);
+   alter table lms_docs enable row level security;
+   create policy "open read" on lms_docs for select using (true);
+   create policy "open insert" on lms_docs for insert with check (true);
+   create policy "open update" on lms_docs for update using (true) with check (true);
+*/
+      const CONFIG = {
+        supabaseUrl: "",
+        supabaseKey: "",
+        pollMs: 4000,
+        // Google Drive (see README): lets teachers pick a file and make a copy for every student.
+        googleClientId: "",
+        googleApiKey: "",
+        googleAppId: "",
+      };
+      const K = "schoolhouse_v2",
+        $ = (s) => document.querySelector(s),
+        uid = () => Math.random().toString(36).slice(2, 8);
+      const esc = (s) =>
+        String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+      const TODAY = "2026-10-02",
+        IC = { assignment: "📝", test: "🧪", link: "🔗", page: "📄", folder: "📁" };
+      function seed() {
+        const nm = ["Alex Rivera", "Bea Okafor", "Cam Nguyen", "Dara Patel", "Eli Brooks", "Fay Morales"],
+          ids = nm.map((n, i) => "s" + (i + 1));
+        const users = [
+          { id: "a1", name: "Principal Hayes", role: "admin" },
+          { id: "t1", name: "Ms. Carter", role: "teacher" },
+          ...nm.map((n, i) => ({ id: ids[i], name: n, role: "student" })),
+        ];
+        const mk = (n, sec, col, items) => ({
+          id: uid(),
+          name: n,
+          sec,
+          col,
+          teacher: "t1",
+          enrolled: ids.slice(),
+          updates: [{ id: uid(), text: "Welcome to the course!", time: TODAY }],
+          items,
+        });
+        const c1 = mk("Algebra I", "Period 2", "#2b6be0", [
+          {
+            id: uid(),
+            type: "assignment",
+            title: "Chapter 3 homework",
+            due: "2026-10-09",
+            pts: 10,
+            text: "Do problems 1-20.",
+          },
+          { id: uid(), type: "link", title: "Khan Academy: slope", url: "https://www.khanacademy.org" },
+          {
+            id: uid(),
+            type: "test",
+            title: "Linear equations quiz",
+            due: "2026-10-12",
+            questions: [
+              { t: "mc", q: "Slope of y = 3x + 2?", opts: ["2", "3", "5"], a: "3" },
+              { t: "tf", q: "A line can have two y-intercepts.", opts: ["True", "False"], a: "False" },
+              { t: "sa", q: "Solve 2x = 10. x = ?", opts: [], a: "5" },
+            ],
+          },
+        ]);
+        const c2 = mk("English 9", "Period 4", "#d4572a", [
+          { id: uid(), type: "page", title: "Syllabus", text: "Reading, response journals, one essay per unit." },
+          {
+            id: uid(),
+            type: "assignment",
+            title: "Reading response: Ch. 5",
+            due: "2026-10-06",
+            pts: 15,
+            text: "One page.",
+          },
+        ]);
+        return {
+          school: { name: "🏫 Schoolhouse", color: "#17325f" },
+          users,
+          courses: [c1, c2],
+          groups: [
+            {
+              id: uid(),
+              name: "Robotics Club",
+              members: ["s1", "s2", "s3"],
+              posts: [{ id: uid(), by: "t1", text: "First meeting is Thursday!", time: TODAY }],
+            },
+          ],
+          sub: {},
+        };
+      }
+      let S;
+      try {
+        S = JSON.parse(localStorage.getItem(K));
+      } catch (e) {}
+      if (!S) S = seed();
+      const save = () => {
+        try {
+          localStorage.setItem(K, JSON.stringify(S));
+        } catch (e) {}
+        pushDb();
+      };
+      fix();
+      let U = {
+        role: "admin",
+        view: "home",
+        cid: null,
+        tab: "materials",
+        item: null,
+        menu: false,
+        form: null,
+        gid: null,
+        folder: null,
+        banner: false,
+      };
+      const me = () => S.users.find((u) => u.id === U.user) || { id: "x", name: U.role, role: U.role },
+        C = (id) => S.courses.find((c) => c.id === id),
+        nm = (id) => (S.users.find((u) => u.id === id) || { name: "Unknown" }).name;
+      const staff = () => U.role !== "student",
+        sg = (c, i, s) => S.sub[c + ":" + i + ":" + s] || {},
+        pts = (i) => (i.type === "test" ? i.questions.reduce((a, q) => a + qp(q), 0) : i.pts),
+        graded = (c) =>
+          c.items.filter((i) => (i.type === "assignment" || i.type === "test") && (staff() || live(c, i)));
+      const kid = (c, p) => c.items.filter((i) => (i.parent || null) === p),
+        live = (c, i) => {
+          while (i) {
+            if (i.pub === false) return false;
+            const p = i.parent;
+            i = c.items.find((x) => x.id === p);
+          }
+          return true;
+        },
+        shown = (c, i) => staff() || live(c, i);
+      const vis = () =>
+        S.courses.filter(
+          (c) => U.role === "admin" || (U.role === "teacher" ? c.teacher === me().id : c.enrolled.includes(me().id)),
+        );
+      const hasG = (g) => g !== undefined && g !== "";
+      const ltr = (p) => (p == null ? "–" : gradeLetter(p)),
+        fmt = (p) => (p == null ? "No grades yet" : p + "% (" + ltr(p) + ")");
+      const go = (v, c, t) => {
+        U.view = v;
+        U.cid = c || null;
+        U.tab = t || "materials";
+        U.item = null;
+        U.menu = false;
+        U.form = null;
+        U.folder = null;
+        U.banner = false;
+        render();
+        scrollTo(0, 0);
+      };
+      function edit(k, id, f, v) {
+        S[k].find((x) => x.id === id)[f] = v;
+        save();
+        render();
+      }
+      function tog(k, id, f, v) {
+        const o = S[k].find((x) => x.id === id);
+        o[f] = o[f].includes(v) ? o[f].filter((x) => x !== v) : [...o[f], v];
+        save();
+        render();
+      }
+      const studs = () => S.users.filter((u) => u.role === "student");
+      function home() {
+        const ups = vis()
+          .flatMap((c) => c.updates.map((u) => ({ ...u, c })))
+          .sort((a, b) => b.time.localeCompare(a.time));
+        const due = vis()
+          .flatMap((c) => c.items.filter((i) => i.due && i.due >= TODAY && live(c, i)).map((i) => ({ ...i, c })))
+          .sort((a, b) => a.due.localeCompare(b.due));
+        return `<h2>Recent activity</h2><div class="grid2"><div class="card">${ups.map((u) => `<div class="item"><span style="width:10px;height:36px;border-radius:4px;background:${u.c.col}"></span><div><b>${esc(u.c.name)}</b> <span class="mut">${u.time}</span><div>${esc(u.text)}</div></div></div>`).join("") || '<p class="mut">No updates yet. Open a course and post one.</p>'}</div>
+<div class="card"><h3>Upcoming</h3>${due.map((a) => `<div class="item"><div>${IC[a.type]} <b>${esc(a.title)}</b><div class="mut">${esc(a.c.name)} · due ${a.due}</div></div></div>`).join("") || '<p class="mut">Nothing due.</p>'}</div></div>`;
+      }
+      function course() {
+        const c = C(U.cid);
+        if (!c) return enr();
+        return `<div class="banner" style="background:${bg(c)};min-height:120px"><div class="row" style="margin:0;justify-content:space-between"><h2>${esc(c.name)}</h2>${staff() ? `<button class="btn" style="background:rgba(255,255,255,.25)" onclick="U.banner=!U.banner;render()">${U.banner ? "Done" : "Edit banner"}</button>` : ""}</div><div>${esc(c.sec)} · ${esc(nm(c.teacher))}</div>${U.banner && staff() ? `<div class="row"><input value="${esc(c.name)}" aria-label="Course name" onchange="edit('courses','${c.id}','name',this.value)"><input value="${esc(c.sec)}" aria-label="Section" onchange="edit('courses','${c.id}','sec',this.value)"><input type="color" value="${c.col}" aria-label="Banner color" onchange="edit('courses','${c.id}','col',this.value)"><input type="file" accept="image/*" aria-label="Banner image" onchange="setImg('${c.id}',this)">${c.img ? `<button class="btn x" onclick="C('${c.id}').img='';save();render()">Remove image</button>` : ""}</div>` : ""}</div><div class="tabs">${[
+          ["materials", "Materials"],
+          ["updates", "Updates"],
+          ["grades", "Grades"],
+          ["members", "Members"],
+        ]
+          .map(
+            (t) =>
+              `<button class="${U.tab === t[0] ? "on" : ""}" onclick="U.tab='${t[0]}';U.item=null;U.folder=null;render()">${t[1]}</button>`,
+          )
+          .join("")}</div>${tabv(c)}`;
+      }
+      function tabv(c) {
+        const t = U.tab;
+        if (t === "materials") return U.item ? itemView(c) : mats(c);
+        if (t === "updates")
+          return (
+            (staff()
+              ? `<div class="card"><textarea id="ut" placeholder="Post an update to this course"></textarea><div class="row"><button class="btn" onclick="postU('${c.id}')">Post update</button></div></div>`
+              : "") +
+            `<div class="card">${
+              c.updates
+                .slice()
+                .reverse()
+                .map(
+                  (u) =>
+                    `<div class="item"><div><span class="mut">${u.time}</span><div>${esc(u.text)}</div></div></div>`,
+                )
+                .join("") || '<p class="mut">No updates yet.</p>'
+            }</div>`
+          );
+        if (t === "members")
+          return `<div class="card"><h3>${esc(nm(c.teacher))} <span class="pill">Teacher</span></h3>${staff() ? `<div class="row" style="justify-content:space-between;margin:0 0 8px"><span class="mut">${c.enrolled.length} students</span><button class="btn" onclick="pick('courses','${c.id}','enrolled','students','Add students')">Add members</button></div>${c.enrolled.map((id) => `<div class="item">${esc(nm(id))}</div>`).join("") || '<p class="mut">No students enrolled yet.</p>'}` : c.enrolled.map((id) => `<div class="item">${esc(nm(id))}</div>`).join("") || '<p class="mut">No students enrolled yet.</p>'}</div>`;
+        if (!staff())
+          return `<div class="card"><h3>Your grade: ${fmt(avg(c, me().id))}</h3>${graded(c)
+            .map((i) => {
+              const g = sg(c.id, i.id, me().id).grade;
+              return `<div class="item"><span>${IC[i.type]}</span><b style="flex:1">${esc(i.title)}</b>${hasG(g) ? g + "/" + pts(i) : "–"}</div>`;
+            })
+            .join("")}</div>`;
+        return (
+          wts(c) +
+          `<div class="card tw"><table><tr><th>Student</th>${graded(c)
+            .map((i) => `<th>${esc(i.title)}<div class="mut">/${pts(i)}</div></th>`)
+            .join("")}<th>Average</th></tr>${c.enrolled
+            .map(
+              (s) =>
+                `<tr><td><b>${esc(nm(s))}</b></td>${graded(c)
+                  .map(
+                    (i) =>
+                      `<td><input type="number" min="0" max="${pts(i)}" value="${esc(sg(c.id, i.id, s).grade ?? "")}" aria-label="${esc(nm(s))} ${esc(i.title)}" onchange="setG('${c.id}','${i.id}','${s}',this.value)"></td>`,
+                  )
+                  .join("")}<td><b>${avg(c, s) == null ? "–" : avg(c, s) + "% " + ltr(avg(c, s))}</b></td></tr>`,
+            )
+            .join("")}</table></div>`
+        );
+      }
+      function itemView(c) {
+        const i = c.items.find((x) => x.id === U.item);
+        if (!i) {
+          U.item = null;
+          return mats(c);
+        }
+        const s = me().id,
+          sb = sg(c.id, i.id, s);
+        let h = `<div class="card"><button class="link" onclick="U.item=null;render()">‹ Back to materials</button><h2 style="margin-top:8px">${IC[i.type]} ${esc(i.title)}</h2>`;
+        if (i.type === "link")
+          h += `<p><a href="${esc(i.url)}" target="_blank" rel="noopener noreferrer">${esc(i.url)}</a></p>`;
+        if (i.type === "page") h += `<p style="white-space:pre-wrap">${esc(i.text)}</p>`;
+        if (i.type === "assignment") h += asgView(c, i, sb);
+        if (i.type === "test") h += testView(c, i, sb);
+        return h + "</div>";
+      }
+      function grades() {
+        return `<h2>Grades</h2><div class="card">${
+          vis()
+            .map((c) => {
+              let p;
+              if (staff()) {
+                const a = c.enrolled.map((s) => avg(c, s)).filter((x) => x != null);
+                p = a.length ? Math.round(a.reduce((x, y) => x + y, 0) / a.length) : null;
+              } else p = avg(c, me().id);
+              return `<div class="item" style="cursor:pointer" onclick="go('course','${c.id}','grades')"><span style="width:10px;height:36px;border-radius:4px;background:${c.col}"></span><div style="flex:1"><b>${esc(c.name)}</b><div class="mut">${staff() ? "Class average" : "Your grade"}</div></div><b>${fmt(p)}</b></div>`;
+            })
+            .join("") || '<p class="mut">No courses.</p>'
+        }</div>`;
+      }
+      function admin() {
+        const T = S.users.filter((u) => u.role !== "student");
+        return `<h2>Admin</h2>${U.msg ? `<p class="bad">${esc(U.msg)}</p>` : ""}<div class="card"><h3>School</h3><div class="row"><input value="${esc(S.school.name)}" aria-label="School name" onchange="S.school.name=this.value;save();render()"><label>Theme <input type="color" value="${S.school.color}" onchange="S.school.color=this.value;save();render()"></label><label class="mut">Logo <input type="file" accept="image/*" aria-label="School logo" onchange="setLogo(this)"></label>${S.school.logo ? `<button class="btn x" onclick="delete S.school.logo;save();render()">Use default logo</button>` : ""}<button class="btn x" style="color:var(--ink)" onclick="splash()">Preview animation</button></div></div>${lpAdmin()}${scaleAdmin()}
+<div class="card"><h3>Users</h3>${S.users.map((u) => `<div class="item"><input value="${esc(u.name)}" aria-label="Name" onchange="edit('users','${u.id}','name',this.value)"><input value="${esc(u.un)}" aria-label="Username" placeholder="username" onchange="setUn('${u.id}',this.value)"><input value="${esc(u.pw)}" aria-label="Password" placeholder="password" onchange="edit('users','${u.id}','pw',this.value)"><input value="${esc(u.email || "")}" aria-label="Google email" placeholder="Google email (optional)" onchange="edit('users','${u.id}','email',this.value.trim())"><select aria-label="Role" onchange="edit('users','${u.id}','role',this.value)">${["admin", "teacher", "student"].map((r) => `<option${u.role === r ? " selected" : ""}>${r}</option>`).join("")}</select><button class="btn x" onclick="del('users','${u.id}')">Remove</button></div>`).join("")}
+<div class="row"><input id="un" placeholder="Name"><input id="uu" placeholder="Username"><input id="up" placeholder="Password"><input id="uem" placeholder="Google email (optional)"><select id="ur"><option>student</option><option>teacher</option><option>admin</option></select><button class="btn" onclick="addUser()">Add user</button></div></div>
+<div class="card"><h3>Courses</h3>${S.courses.map((c) => `<details><summary>${esc(c.name)}</summary><div class="row"><input value="${esc(c.name)}" aria-label="Course name" onchange="edit('courses','${c.id}','name',this.value)"><input value="${esc(c.sec)}" aria-label="Section" onchange="edit('courses','${c.id}','sec',this.value)"><input type="color" value="${c.col}" aria-label="Color" onchange="edit('courses','${c.id}','col',this.value)"><select aria-label="Teacher" onchange="edit('courses','${c.id}','teacher',this.value)">${T.map((t) => `<option value="${t.id}"${c.teacher === t.id ? " selected" : ""}>${esc(t.name)}</option>`).join("")}</select><button class="btn x" onclick="del('courses','${c.id}')">Delete</button></div><div class="row"><button class="btn" onclick="pick('courses','${c.id}','enrolled','students','Add students')">Edit enrolled students (${c.enrolled.length})</button></div></details>`).join("")}
+<div class="row"><input id="cn" placeholder="New course name"><input id="cs" placeholder="Section"><button class="btn" onclick="addCourse()">Add course</button></div></div>
+<div class="card"><h3>Groups</h3>${S.groups.map((g) => `<details><summary>${esc(g.name)}</summary><div class="row"><input value="${esc(g.name)}" aria-label="Group name" onchange="edit('groups','${g.id}','name',this.value)"><button class="btn x" onclick="del('groups','${g.id}')">Delete</button></div><div class="row"><button class="btn" onclick="pick('groups','${g.id}','members','all','Add members')">Edit members (${g.members.length})</button></div></details>`).join("")}
+<div class="row"><input id="gn" placeholder="New group name"><button class="btn" onclick="addGroup()">Add group</button></div></div>`;
+      }
+      const v = (id) => $(id).value.trim();
+      function postU(c) {
+        const t = v("#ut");
+        if (!t) return;
+        C(c).updates.push({ id: uid(), text: t, time: TODAY });
+        save();
+        render();
+      }
+      function postG(g) {
+        const t = v("#gp");
+        if (!t) return;
+        S.groups.find((x) => x.id === g).posts.push({ id: uid(), by: me().id, text: t, time: TODAY });
+        save();
+        render();
+      }
+      function setG(c, i, s, x) {
+        const k = c + ":" + i + ":" + s;
+        S.sub[k] = S.sub[k] || {};
+        S.sub[k].grade = x;
+        save();
+        render();
+      }
+      function addCourse() {
+        const n = v("#cn");
+        if (!n) return;
+        const t = S.users.find((u) => u.role === "teacher") || S.users[0],
+          cl = ["#7a4fd1", "#c0398a", "#0f8aa6", "#b8860b"];
+        S.courses.push({
+          id: uid(),
+          name: n,
+          sec: v("#cs") || "Section 1",
+          col: cl[S.courses.length % 4],
+          teacher: t.id,
+          enrolled: [],
+          updates: [],
+          items: [],
+        });
+        save();
+        render();
+      }
+      function mats(c) {
+        const F = U.form,
+          fld = {
+            assignment: `<input id="f2" type="date" value="${TODAY}"><input id="f3" type="number" min="1" value="10" style="width:80px" aria-label="Points"><textarea id="f4" placeholder="Instructions"></textarea><input id="f6" placeholder="Google Drive link (optional)" style="min-width:240px"><select id="f7" aria-label="How students get the file"><option value="view">Students can view file</option><option value="edit">Students can edit file</option><option value="copy">Make a copy for each student</option>${CONFIG.googleClientId ? '<option value="auto">Automatic copy for each student (Google)</option>' : ""}</select>${CONFIG.googleClientId ? '<button class="btn x" style="color:var(--ink)" onclick="pickFromDrive()">Choose from Google Drive</button>' : ""}<span class="mut">Share the file with "Anyone with the link" so students can open it.</span>`,
+            test: `<input id="f2" type="date" value="${TODAY}"><span class="mut">Add questions after you create it.</span>`,
+            link: `<input id="f1" placeholder="https://example.com" style="min-width:240px">`,
+            page: `<textarea id="f4" placeholder="Page content"></textarea>`,
+            folder: `<input id="f5" type="color" value="#e0a030" aria-label="Folder color">`,
+          };
+        const path = [];
+        let f = c.items.find((x) => x.id === U.folder);
+        while (f) {
+          path.unshift(f);
+          const p = f.parent;
+          f = c.items.find((x) => x.id === p);
+        }
+        const crumbs = `<div class="mut" style="margin-bottom:8px"><button class="link" onclick="U.folder=null;render()">${esc(c.name)}</button>${path.map((p) => ` › <button class="link" onclick="U.folder='${p.id}';render()">${esc(p.title)}</button>`).join("")}</div>`;
+        const row = (i) => {
+          const fo = i.type === "folder";
+          return `<div class="item">${fo ? `<span style="width:28px;height:22px;border-radius:4px 8px 4px 4px;background:${i.col}"></span>` : `<span style="font-size:22px">${IC[i.type]}</span>`}<div style="flex:1"><button class="link" onclick="${fo ? `U.folder='${i.id}'` : `U.item='${i.id}'`};render()"><b>${esc(i.title)}</b></button><div class="mut">${fo ? kid(c, i.id).length + " items" : i.due ? "Due " + i.due : i.type}${i.type === "test" ? " · " + i.questions.length + " questions" : ""}${i.pub === false ? " · Unpublished" : ""}</div></div>${staff() && (i.type === "assignment" || i.type === "test") && c.cats && c.cats.length ? `<select aria-label="Grade category" onchange="setCat('${c.id}','${i.id}',this.value)"><option value="">No category</option>${c.cats.map((k) => `<option value="${k.id}"${i.cat === k.id ? " selected" : ""}>${esc(k.name)}</option>`).join("")}</select>` : ""}${staff() ? `<button class="btn x" style="color:var(--ink)" onclick="pubT('${c.id}','${i.id}')">${i.pub === false ? "Publish" : "Unpublish"}</button><button class="btn x" onclick="delItem('${c.id}','${i.id}')">Delete</button>` : ""}</div>`;
+        };
+        const list = kid(c, U.folder).filter((i) => shown(c, i));
+        return (
+          (staff()
+            ? `<div class="card"><div class="menu"><button class="btn" onclick="U.menu=!U.menu;render()">Add Materials ▾</button>${
+                U.menu
+                  ? `<div class="dd">${[
+                      ["folder", "Folder"],
+                      ["assignment", "Assignment"],
+                      ["test", "Test/Quiz"],
+                      ["link", "Link / Resource"],
+                      ["page", "Page"],
+                    ]
+                      .map(
+                        (m) => `<button onclick="U.form='${m[0]}';U.menu=false;render()">${IC[m[0]]} ${m[1]}</button>`,
+                      )
+                      .join("")}</div>`
+                  : ""
+              }</div>${U.folder ? '<span class="mut"> Adding inside the open folder</span>' : ""}
+${F ? `<div class="row"><b>New ${F}</b><input id="f0" placeholder="Title">${fld[F]}<button class="btn" onclick="addItem('${c.id}')">Create</button><button class="link" onclick="U.form=null;render()">Cancel</button></div>` : ""}</div>`
+            : "") +
+          `<div class="card">${crumbs}${list.map(row).join("") || '<p class="mut">Nothing here yet. Use Add Materials to create a folder, assignment, test, link or page.</p>'}</div>`
+        );
+      }
+      function addItem(cid) {
+        const t = v("#f0");
+        if (!t) return;
+        const g = (id) => ($(id) ? $(id).value.trim() : ""),
+          i = { id: uid(), type: U.form, title: t, parent: U.folder, pub: true };
+        if (U.form === "folder") i.col = g("#f5") || "#e0a030";
+        if (U.form === "assignment") {
+          i.due = g("#f2") || TODAY;
+          i.pts = +g("#f3") || 10;
+          i.text = g("#f4");
+          const du = g("#f6");
+          if (g("#f7") === "auto") {
+            if (!U.picked) {
+              note('Choose the file with "Choose from Google Drive" first.');
+              return;
+            }
+            i.drive = { kind: U.picked.kind, id: U.picked.id, mode: "auto", copies: {} };
+            U.autoCopy = true;
+          } else if (du) {
+            const d = parseDrive(du);
+            if (!d) {
+              note("Paste a Google Drive, Docs, Sheets or Slides link.");
+              return;
+            }
+            d.mode = d.kind === "file" || d.kind === "folder" ? "view" : g("#f7");
+            i.drive = d;
+          }
+        }
+        if (U.form === "test") {
+          i.due = g("#f2") || TODAY;
+          i.questions = [];
+        }
+        if (U.form === "link") {
+          let u = g("#f1");
+          if (!u) return;
+          if (!/^https?:\/\//i.test(u)) u = "https://" + u;
+          i.url = u;
+        }
+        if (U.form === "page") i.text = g("#f4");
+        C(cid).items.push(i);
+        if (U.autoCopy) {
+          U.autoCopy = false;
+          U.picked = null;
+          setTimeout(() => makeCopies(cid, i.id), 0);
+        }
+        U.form = null;
+        if (i.type === "test") U.item = i.id;
+        save();
+        render();
+      }
+      function delItem(c, id) {
+        const cc = C(c),
+          kill = new Set([id]);
+        let n;
+        do {
+          n = kill.size;
+          cc.items.forEach((i) => {
+            if (kill.has(i.parent)) kill.add(i.id);
+          });
+        } while (kill.size > n);
+        cc.items = cc.items.filter((i) => !kill.has(i.id));
+        if (kill.has(U.folder)) U.folder = null;
+        save();
+        render();
+      }
+      function pubT(c, id) {
+        const i = C(c).items.find((x) => x.id === id);
+        i.pub = i.pub === false;
+        save();
+        render();
+      }
+      function groups() {
+        const g = U.gid && S.groups.find((x) => x.id === U.gid);
+        if (g) {
+          const ga = staff() || g.admins.includes(me().id);
+          return `<div class="card"><button class="link" onclick="U.gid=null;render()">‹ All groups</button><h2 style="margin-top:8px">${esc(g.name)}</h2><p class="mut">Members: ${esc(g.members.map((id) => nm(id) + (g.admins.includes(id) ? " (admin)" : "")).join(", ")) || "none yet"}</p></div>
+${ga ? `<div class="card"><h3>Post an update</h3><textarea id="gp" placeholder="Write an update for the group"></textarea><div class="row"><button class="btn" onclick="postG('${g.id}')">Post update</button></div><h3 style="margin-top:16px">Add a resource</h3><div class="row"><input id="gr" placeholder="Title"><input id="gu" placeholder="Link (optional)"><button class="btn" onclick="addRes('${g.id}')">Add resource</button></div></div>` : ""}
+${staff() ? `<div class="card"><h3>Manage members</h3><div class="row" style="margin:0"><button class="btn" onclick="pick('groups','${g.id}','members','all','Add members')">Add members</button><button class="btn x" style="color:var(--ink)" onclick="pick('groups','${g.id}','admins','members','Choose group admins')">Group admins</button></div><p class="mut">Group admins can post updates and resources.</p></div>` : ""}
+<div class="card"><h3>Resources</h3>${g.res.map((r) => `<div class="item"><span style="font-size:22px">🔗</span><div style="flex:1"><b>${r.url ? `<a href="${esc(r.url)}" target="_blank" rel="noopener noreferrer">${esc(r.title)}</a>` : esc(r.title)}</b><div class="mut">${esc(nm(r.by))} · ${r.time}</div></div>${ga ? `<button class="btn x" onclick="delRes('${g.id}','${r.id}')">Delete</button>` : ""}</div>`).join("") || '<p class="mut">No resources yet.</p>'}</div>
+<div class="card"><h3>Updates</h3>${
+            g.posts
+              .slice()
+              .reverse()
+              .map(
+                (p) =>
+                  `<div class="item"><div><b>${esc(nm(p.by))}</b> <span class="mut">${p.time}</span><div>${esc(p.text)}</div></div></div>`,
+              )
+              .join("") || '<p class="mut">No updates yet.</p>'
+          }</div>`;
+        }
+        const l = S.groups.filter((x) => U.role !== "student" || x.members.includes(me().id));
+        return `<h2>Groups</h2>${staff() ? `<div class="card"><div class="row" style="margin:0"><input id="gn" placeholder="New group name"><button class="btn" onclick="addGroup()">New Group</button></div></div>` : ""}<div class="courses">${l.map((x) => `<div class="card course" onclick="U.gid='${x.id}';render()"><div class="bar" style="background:#6a4fd1"></div><div><b>${esc(x.name)}</b><div class="mut">${x.members.length} members</div></div></div>`).join("") || '<p class="mut">You are not in any groups yet.</p>'}</div>`;
+      }
+      function addRes(g) {
+        const t = v("#gr");
+        if (!t) return;
+        let u = v("#gu");
+        if (u && !/^https?:\/\//i.test(u)) u = "https://" + u;
+        S.groups.find((x) => x.id === g).res.push({ id: uid(), title: t, url: u, by: me().id, time: TODAY });
+        save();
+        render();
+      }
+      function delRes(g, id) {
+        const o = S.groups.find((x) => x.id === g);
+        o.res = o.res.filter((r) => r.id !== id);
+        save();
+        render();
+      }
+      function bg(c) {
+        return c.img ? `linear-gradient(rgba(0,0,0,.4),rgba(0,0,0,.4)),url('${c.img}') center/cover` : c.col;
+      }
+      function setImg(cid, inp) {
+        const f = inp.files[0];
+        if (!f) return;
+        const rd = new FileReader();
+        rd.onload = () => {
+          const im = new Image();
+          im.onload = () => {
+            const w = Math.min(800, im.width),
+              h = Math.round((im.height * w) / im.width),
+              cv = document.createElement("canvas");
+            cv.width = w;
+            cv.height = h;
+            {
+              const x = cv.getContext("2d");
+              x.fillStyle = "#fff";
+              x.fillRect(0, 0, w, h);
+              x.drawImage(im, 0, 0, w, h);
+            }
+            C(cid).img = cv.toDataURL("image/jpeg", 0.6);
+            save();
+            render();
+          };
+          im.src = rd.result;
+        };
+        rd.readAsDataURL(f);
+      }
+      function avg(c, s) {
+        const all = graded(c),
+          gi = all.filter((i) => hasG(sg(c.id, i.id, s).grade)),
+          cats = c.cats || [];
+        if (!(cats.length && all.some((i) => i.cat))) {
+          let e = 0,
+            p = 0;
+          gi.forEach((i) => {
+            e += +sg(c.id, i.id, s).grade;
+            p += pts(i);
+          });
+          return p ? Math.round((e / p) * 100) : null;
+        }
+        let tw = 0,
+          sum = 0;
+        cats.forEach((k) => {
+          let e = 0,
+            p = 0;
+          gi.filter((i) => i.cat === k.id).forEach((i) => {
+            e += +sg(c.id, i.id, s).grade;
+            p += pts(i);
+          });
+          if (p) {
+            tw += +k.w;
+            sum += (+k.w * e) / p;
+          }
+        });
+        return tw ? Math.round((sum / tw) * 100) : null;
+      }
+      function wts(c) {
+        c.cats = c.cats || [];
+        const tot = c.cats.reduce((a, k) => a + (+k.w || 0), 0);
+        return `<div class="card"><h3>Grade weights</h3>${c.cats.map((k) => `<div class="item"><input value="${esc(k.name)}" aria-label="Category name" onchange="setCatF('${c.id}','${k.id}','name',this.value)"><label><input type="number" min="0" max="100" value="${k.w}" style="width:70px" aria-label="Weight" onchange="setCatF('${c.id}','${k.id}','w',this.value)"> %</label><button class="btn x" onclick="delCat('${c.id}','${k.id}')">Remove</button></div>`).join("") || '<p class="mut">No categories yet. Add some (for example Homework 30%, Tests 70%), then pick a category for each assignment or test on the Materials tab. Until then, grades use plain points.</p>'}
+<div class="row"><input id="wn" placeholder="Category name"><input id="ww" type="number" min="0" max="100" placeholder="Weight %" style="width:100px"><button class="btn" onclick="addCat('${c.id}')">Add category</button></div>${c.cats.length ? `<p class="${tot === 100 ? "ok" : "bad"}">Total: ${tot}%${tot === 100 ? "" : " (should add up to 100%)"}</p>` : ""}</div>`;
+      }
+      function setCatF(c, k, f, x) {
+        const o = C(c).cats.find((y) => y.id === k);
+        o[f] = f === "w" ? Math.max(0, +x || 0) : x;
+        save();
+        render();
+      }
+      function delCat(c, k) {
+        const cc = C(c);
+        cc.cats = cc.cats.filter((x) => x.id !== k);
+        cc.items.forEach((i) => {
+          if (i.cat === k) i.cat = "";
+        });
+        save();
+        render();
+      }
+      function addCat(c) {
+        const n = v("#wn");
+        if (!n) return;
+        const cc = C(c);
+        cc.cats = cc.cats || [];
+        cc.cats.push({ id: uid(), name: n, w: Math.max(0, +v("#ww") || 0) });
+        save();
+        render();
+      }
+      function setCat(c, i, k) {
+        C(c).items.find((x) => x.id === i).cat = k;
+        save();
+        render();
+      }
+      const cards = (l, from) =>
+        l
+          .map(
+            (c) =>
+              `<div class="card course" onclick="U.from='${from}';go('course','${c.id}')"><div class="bar" style="background:${bg(c)}"></div><div><b>${esc(c.name)}</b><div class="mut">${esc(c.sec)} · ${esc(nm(c.teacher))}</div></div></div>`,
+          )
+          .join("");
+      function newCourse() {
+        const n = v("#nc");
+        if (!n) return;
+        const t = U.role === "teacher" ? me().id : (S.users.find((u) => u.role === "teacher") || me()).id,
+          cl = ["#7a4fd1", "#c0398a", "#0f8aa6", "#b8860b"],
+          c = {
+            id: uid(),
+            name: n,
+            sec: v("#ns") || "Section 1",
+            col: cl[S.courses.length % 4],
+            teacher: t,
+            enrolled: [],
+            updates: [],
+            items: [],
+            cats: [],
+          };
+        S.courses.push(c);
+        save();
+        U.from = "mycourses";
+        go("course", c.id);
+      }
+      const gcards = (l) =>
+        l
+          .map(
+            (x) =>
+              `<div class="card course" onclick="U.gid='${x.id}';render()"><div class="bar" style="background:#6a4fd1"></div><div><b>${esc(x.name)}</b><div class="mut">${x.members.length} members</div></div></div>`,
+          )
+          .join("");
+      function enr() {
+        const l = S.courses.filter((c) => c.enrolled.includes(me().id) || vis().includes(c));
+        return `<div class="row" style="justify-content:space-between;margin:0 0 8px"><h2 style="margin:0">Courses</h2>${staff() ? `<button class="btn" onclick="go('mycourses')">My Courses</button>` : ""}</div><p class="mut">All your courses: the ones you are enrolled in and the ones you teach.</p><div class="courses">${cards(l, "courses") || '<p class="mut">You are not enrolled in any courses yet.</p>'}</div>`;
+      }
+      function myCourses() {
+        return `<button class="link" onclick="go('courses')">‹ Back to Courses</button><h2 style="margin-top:8px">My Courses</h2><p class="mut">Courses you teach.</p><div class="grid2"><div class="courses" style="align-content:start">${cards(vis(), "mycourses") || '<p class="mut">You are not teaching any courses yet. Create one on the right.</p>'}</div><div class="card"><h3>New Course</h3><input id="nc" placeholder="Course name" style="width:100%"><input id="ns" placeholder="Section" style="width:100%;margin-top:8px"><div class="row"><button class="btn" onclick="newCourse()">New Course</button></div><p class="mut">After creating it, add students on the Members tab and a banner image with Edit banner.</p></div></div>`;
+      }
+      function groups2() {
+        if (U.gid) return groups();
+        const l = S.groups.filter(
+          (g) => g.members.includes(me().id) || (staff() && (U.role === "admin" || !g.owner || g.owner === me().id)),
+        );
+        return `<div class="row" style="justify-content:space-between;margin:0 0 8px"><h2 style="margin:0">Groups</h2>${staff() ? `<button class="btn" onclick="U.gid=null;go('mygroups')">My Groups</button>` : ""}</div><p class="mut">All your groups: the ones you belong to and the ones you manage.</p><div class="courses">${gcards(l) || '<p class="mut">You are not in any groups yet.</p>'}</div>`;
+      }
+      function myGroups() {
+        if (U.gid) return groups();
+        const l = S.groups.filter((g) => U.role === "admin" || !g.owner || g.owner === me().id);
+        return `<button class="link" onclick="U.gid=null;go('groups')">‹ Back to Groups</button><h2 style="margin-top:8px">My Groups</h2><p class="mut">Groups you manage.</p><div class="grid2"><div class="courses" style="align-content:start">${gcards(l) || '<p class="mut">You have not created any groups yet. Create one on the right.</p>'}</div><div class="card"><h3>New Group</h3><input id="gn" placeholder="Group name" style="width:100%"><div class="row"><button class="btn" onclick="addGroup()">New Group</button></div><p class="mut">After creating it, add members and group admins from the group page.</p></div></div>`;
+      }
+      function addGroup() {
+        const n = v("#gn");
+        if (!n) return;
+        S.groups.push({ id: uid(), name: n, members: [], admins: [], res: [], posts: [], owner: me().id });
+        save();
+        render();
+      }
+      function pick(k, id, f, src, title) {
+        U.pick = { k, id, f, src, title };
+        U.q = "";
+        render();
+      }
+      function pickList() {
+        const p = U.pick,
+          o = S[p.k].find((x) => x.id === p.id);
+        let l =
+          p.src === "students"
+            ? studs()
+            : p.src === "members"
+              ? S.users.filter((u) => o.members.includes(u.id))
+              : S.users;
+        const q = (U.q || "").toLowerCase();
+        l = l.filter((u) => u.name.toLowerCase().includes(q));
+        return (
+          l
+            .map((u) => {
+              const on = o[p.f].includes(u.id);
+              return `<button class="pr${on ? " on" : ""}" role="checkbox" aria-checked="${on}" onclick="tog('${p.k}','${o.id}','${p.f}','${u.id}')"><span class="av" style="background:hsl(${([...u.id].reduce((a, c) => a + c.charCodeAt(0), 0) * 37) % 360} 55% 42%)">${esc(
+                u.name
+                  .split(" ")
+                  .map((w) => w[0])
+                  .slice(0, 2)
+                  .join(""),
+              )}</span><span style="flex:1;text-align:left"><b>${esc(u.name)}</b><div class="mut">${u.role}</div></span><span class="ck">${on ? "✓" : ""}</span></button>`;
+            })
+            .join("") || '<p class="mut" style="padding:12px">No one found.</p>'
+        );
+      }
+      function modal() {
+        const p = U.pick;
+        if (!p) return "";
+        const o = S[p.k].find((x) => x.id === p.id);
+        if (!o) {
+          U.pick = null;
+          return "";
+        }
+        return `<div class="ov" onclick="if(event.target===this){U.pick=null;render()}"><div class="dlg" role="dialog" aria-modal="true" aria-label="${esc(p.title)}"><h3 style="margin:0">${esc(p.title)}</h3><div class="mut">${esc(o.name)} · ${o[p.f].length} selected</div><input id="pq" placeholder="Search people" value="${esc(U.q || "")}" oninput="U.q=this.value;$('#pl').innerHTML=pickList()" style="width:100%"><div id="pl" class="pls">${pickList()}</div><div class="row" style="justify-content:flex-end;margin:0"><button class="btn" onclick="U.pick=null;render()">Done</button></div></div></div>`;
+      }
+      addEventListener("keydown", (e) => {
+        if (e.key === "Escape" && U.pick) {
+          U.pick = null;
+          render();
+        }
+      });
+      const LOGO =
+          "data:image/jpeg;base64,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",
+        logo = () => S.school.logo || LOGO;
+      try {
+        U.user = localStorage.getItem("lms_user");
+      } catch (e) {}
+      U.loading = !!(window.claude || (CONFIG.supabaseUrl && CONFIG.supabaseKey));
+      let DB = null,
+        last = {},
+        ts = {},
+        tm = 0,
+        loaded = false,
+        seeded = false;
+      function brand() {
+        document.documentElement.style.setProperty("--nav", S.school.color);
+        $("#sn").innerHTML =
+          `<img src="${logo()}" alt="" style="height:30px;width:30px;object-fit:cover;border-radius:6px;vertical-align:middle;margin-right:8px">${esc(S.school.name)}`;
+      }
+      function login() {
+        return loginCard(false);
+      }
+      function signIn() {
+        const un = v("#lu").toLowerCase(),
+          pw = $("#lp").value,
+          u = S.users.find((x) => x.un === un && x.pw === pw);
+        if (!u) {
+          U.msg = "Wrong username or password.";
+          render();
+          $("#lu").value = un;
+          return;
+        }
+        U.msg = "";
+        U.user = u.id;
+        U.view = "home";
+        try {
+          localStorage.setItem("lms_user", u.id);
+        } catch (e) {}
+        render();
+        splash();
+      }
+      function signOut() {
+        U.user = null;
+        U.msg = "";
+        U.pick = null;
+        try {
+          localStorage.removeItem("lms_user");
+        } catch (e) {}
+        render();
+      }
+      function splash() {
+        const d = document.createElement("div");
+        d.className = "sp2";
+        d.innerHTML = `<img src="${logo()}" alt="" class="sl"><h1>${[...S.school.name].map((c, i) => `<span style="animation-delay:${0.7 + i * 0.05}s">${c === " " ? "&nbsp;" : esc(c)}</span>`).join("")}</h1>`;
+        d.onclick = () => d.remove();
+        document.body.appendChild(d);
+        setTimeout(() => d.remove(), 3300);
+      }
+      function setLogo(inp) {
+        const f = inp.files[0];
+        if (!f) return;
+        const rd = new FileReader();
+        rd.onload = () => {
+          const im = new Image();
+          im.onload = () => {
+            const w = Math.min(400, im.width),
+              h = Math.round((im.height * w) / im.width),
+              cv = document.createElement("canvas");
+            cv.width = w;
+            cv.height = h;
+            const x = cv.getContext("2d");
+            x.fillStyle = "#fff";
+            x.fillRect(0, 0, w, h);
+            x.drawImage(im, 0, 0, w, h);
+            S.school.logo = cv.toDataURL("image/jpeg", 0.8);
+            save();
+            render();
+          };
+          im.src = rd.result;
+        };
+        rd.readAsDataURL(f);
+      }
+      function addUser() {
+        const n = v("#un"),
+          un = v("#uu").toLowerCase(),
+          pw = v("#up");
+        if (!n || !un || !pw) {
+          U.msg = "Enter a name, username and password.";
+          render();
+          return;
+        }
+        if (S.users.some((u) => u.un === un)) {
+          U.msg = "That username is taken.";
+          render();
+          return;
+        }
+        S.users.push({ id: uid(), name: n, un, pw, email: v("#uem"), role: $("#ur").value });
+        U.msg = "";
+        save();
+        render();
+      }
+      function setUn(id, val) {
+        val = val.trim().toLowerCase();
+        if (!val || S.users.some((u) => u.un === val && u.id !== id)) {
+          U.msg = "Username is empty or already taken.";
+          render();
+          return;
+        }
+        U.msg = "";
+        edit("users", id, "un", val);
+      }
+      function del(k, id) {
+        if (k === "users" && id === U.user) {
+          U.msg = "You cannot remove the account you are signed in with.";
+          render();
+          return;
+        }
+        S[k] = S[k].filter((x) => x.id !== id);
+        if (k === "courses" && U.cid === id) go("courses");
+        save();
+        render();
+      }
+      const lpd = () =>
+        Object.assign(
+          { title: "", sub: "Sign in to continue", bg: "", bgImg: "", btn: "", cardBg: "", showLogo: true, foot: "" },
+          S.school.lp || {},
+        );
+      function loginBgCss(o, fixed) {
+        return o.bgImg
+          ? `linear-gradient(rgba(0,0,0,.35),rgba(0,0,0,.35)),url('${o.bgImg}') center/cover${fixed ? " fixed" : ""}`
+          : o.bg || "";
+      }
+      function loginBg() {
+        document.body.style.background = loginBgCss(lpd(), true);
+      }
+      function loginCard(pre) {
+        const o = lpd(),
+          ad = !pre && S.users.some((u) => u.role === "admin" && u.pw === "admin"),
+          dis = pre ? " disabled" : "",
+          id = (x) => (pre ? "" : ` id="${x}"`);
+        let vars = "";
+        if (o.cardBg) {
+          const h = o.cardBg.replace("#", ""),
+            n = parseInt(h.length === 3 ? h.replace(/./g, "$&$&") : h, 16),
+            l = ((n >> 16) & 255) * 0.299 + ((n >> 8) & 255) * 0.587 + (n & 255) * 0.114;
+          vars =
+            `background:${o.cardBg};` +
+            (l > 150
+              ? "--ink:#1c2538;--mut:#667189;--bg:#eef1f6;--line:#dbe0ea;"
+              : "--ink:#e6eaf3;--mut:#94a0b8;--bg:#10151f;--line:#2c364b;");
+        }
+        return `<div class="card" style="max-width:380px;margin:${pre ? "0 auto" : "40px auto"};text-align:center;color:var(--ink);${vars}">${o.showLogo ? `<img src="${logo()}" alt="" style="width:150px;height:auto;border-radius:12px">` : ""}<h2 style="margin:8px 0 4px">${esc(o.title || S.school.name)}</h2><p class="mut">${esc(o.sub)}</p><input${id("lu")}${dis} placeholder="Username" autocomplete="username" style="width:100%" onkeydown="if(event.key==='Enter')$('#lp').focus()"><input${id("lp")}${dis} type="password" placeholder="Password" autocomplete="current-password" style="width:100%;margin-top:8px" onkeydown="if(event.key==='Enter')signIn()">${!pre && U.msg ? `<p class="bad">${esc(U.msg)}</p>` : ""}<div class="row"><button class="btn"${dis}${pre ? "" : ' onclick="signIn()"'} style="width:100%;${o.btn ? "background:" + o.btn + ";" : ""}">Sign in</button></div>${o.foot ? `<p class="mut">${esc(o.foot)}</p>` : ""}${ad ? '<p class="mut">First time here? The admin account is username <b>admin</b>, password <b>admin</b>. Change it on the Admin page.</p>' : ""}</div>`;
+      }
+      function lpAdmin() {
+        const o = lpd(),
+          f = (k, label, ph) =>
+            `<label class="mut" style="display:block;margin-top:8px">${label}<input value="${esc(o[k])}" placeholder="${esc(ph)}" style="width:100%" onchange="lpSet('${k}',this.value)"></label>`;
+        return `<div class="card"><h3>Login page</h3><div class="grid2"><div>${f("title", "Headline", "School name")}${f("sub", "Subtitle", "Sign in to continue")}${f("foot", "Footer note", "Optional")}
+<div class="row"><label>Background <input type="color" value="${o.bg || "#17325f"}" onchange="lpSet('bg',this.value)"></label><label>Button <input type="color" value="${o.btn || "#2b6be0"}" onchange="lpSet('btn',this.value)"></label><label>Card <input type="color" value="${o.cardBg || "#ffffff"}" onchange="lpSet('cardBg',this.value)"></label></div>
+<div class="row"><label class="mut">Background image <input type="file" accept="image/*" aria-label="Login background image" onchange="setLoginBg(this)"></label>${o.bgImg ? `<button class="btn x" onclick="lpSet('bgImg','')">Remove image</button>` : ""}</div>
+<div class="row"><label><input type="checkbox"${o.showLogo ? " checked" : ""} onchange="lpSet('showLogo',this.checked)"> Show logo</label><button class="btn x" onclick="S.school.lp={};save();render()">Reset to default</button></div></div>
+<div><div class="mut" style="margin-bottom:6px">Preview</div><div style="border-radius:10px;padding:16px;background:${loginBgCss(o) || "var(--bg)"};border:1px solid var(--line)">${loginCard(true)}</div></div></div></div>`;
+      }
+      function lpSet(k, v) {
+        S.school.lp = S.school.lp || {};
+        S.school.lp[k] = v;
+        save();
+        render();
+      }
+      function setLoginBg(inp) {
+        const f = inp.files[0];
+        if (!f) return;
+        const rd = new FileReader();
+        rd.onload = () => {
+          const im = new Image();
+          im.onload = () => {
+            const w = Math.min(1200, im.width),
+              h = Math.round((im.height * w) / im.width),
+              cv = document.createElement("canvas");
+            cv.width = w;
+            cv.height = h;
+            const x = cv.getContext("2d");
+            x.fillStyle = "#fff";
+            x.fillRect(0, 0, w, h);
+            x.drawImage(im, 0, 0, w, h);
+            lpSet("bgImg", cv.toDataURL("image/jpeg", 0.6));
+          };
+          im.src = rd.result;
+        };
+        rd.readAsDataURL(f);
+      }
+      const lsSave = () => {
+        try {
+          localStorage.setItem(K, JSON.stringify(S));
+        } catch (e) {}
+      };
+      const subSid = (k) => k.split(":")[2];
+      function pushDb() {
+        if (!DB) return;
+        clearTimeout(tm);
+        tm = setTimeout(commit, 400);
+      }
+      async function commitNow() {
+        clearTimeout(tm);
+        return commit();
+      }
+      async function commit() {
+        if (!DB) return true;
+        const w = [],
+          keys = [],
+          { sub, ...rest } = S,
+          cj = JSON.stringify(rest);
+        if (staff() && cj !== last.core) {
+          last.core = cj;
+          ts.core = Date.now();
+          keys.push("core");
+          w.push(DB.doc("lms/core").set({ json: cj, ts: ts.core }));
+        }
+        const by = {};
+        Object.keys(S.sub).forEach((k) => ((by[subSid(k)] = by[subSid(k)] || {})[k] = S.sub[k]));
+        Object.keys(last).forEach((k) => {
+          if (k.startsWith("sub_") && !by[k.slice(4)]) by[k.slice(4)] = {};
+        });
+        for (const sid in by) {
+          const key = "sub_" + sid,
+            j = JSON.stringify(by[sid]);
+          if (j !== last[key] && (staff() || sid === U.user)) {
+            last[key] = j;
+            ts[key] = Date.now();
+            keys.push(key);
+            w.push(DB.doc("lms/" + key).set({ json: j, ts: ts[key] }));
+          }
+        }
+        const res = await Promise.allSettled(w);
+        let ok = true;
+        res.forEach((r, n) => {
+          if (r.status === "rejected") {
+            ok = false;
+            delete last[keys[n]];
+          }
+        });
+        if (!ok)
+          note(
+            "Not saved to the shared database. Your account may be view-only. Ask the course owner for Contributor (edit) access.",
+          );
+        return ok;
+      }
+      function applyDoc(d) {
+        const id = d.id,
+          x = d.data();
+        if (
+          !x ||
+          typeof x.json !== "string" ||
+          (x.ts || 0) < (ts[id] || 0) ||
+          x.json === last[id === "core" ? "core" : id]
+        )
+          return;
+        try {
+          const o = JSON.parse(x.json);
+          if (id === "core") {
+            if (!o || !o.users || !o.courses || !o.groups || !o.school) return;
+            o.sub = S.sub || {};
+            S = o;
+            fix();
+            last.core = x.json;
+          } else if (id.startsWith("sub_")) {
+            const sid = id.slice(4);
+            Object.keys(S.sub).forEach((k) => {
+              if (subSid(k) === sid) delete S.sub[k];
+            });
+            Object.assign(S.sub, o);
+            last[id] = x.json;
+          } else return;
+          ts[id] = x.ts || 0;
+        } catch (e) {}
+      }
+      // Optional shared backend (Supabase REST). Gives every device the same accounts and data.
+      function sbAdapter(url, key) {
+        const H = { apikey: key, Authorization: "Bearer " + key, "Content-Type": "application/json" },
+          base = url.replace(/\/$/, "") + "/rest/v1/lms_docs";
+        return {
+          doc: (p) => ({
+            set: async (d) => {
+              const r = await fetch(base + "?on_conflict=id", {
+                method: "POST",
+                headers: { ...H, Prefer: "resolution=merge-duplicates,return=minimal" },
+                body: JSON.stringify([{ id: p.split("/")[1], json: d.json, ts: d.ts }]),
+              });
+              if (!r.ok) throw new Error("save failed " + r.status);
+            },
+          }),
+          collection: () => ({
+            onSnapshot: (cb, err) => {
+              const docs = {};
+              let first = true;
+              const tick = async () => {
+                try {
+                  const l = await (await fetch(base + "?select=id,ts", { headers: H })).json();
+                  if (!Array.isArray(l)) throw new Error("bad response");
+                  const need = l.filter((x) => !docs[x.id] || +docs[x.id].ts < +x.ts);
+                  let changed = first;
+                  if (need.length) {
+                    const q = need.map((x) => '"' + x.id + '"').join(",");
+                    const rows = await (
+                      await fetch(base + "?select=id,json,ts&id=in.(" + encodeURIComponent(q) + ")", { headers: H })
+                    ).json();
+                    if (!Array.isArray(rows)) throw new Error("bad response");
+                    rows.forEach((r) => (docs[r.id] = r));
+                    changed = true;
+                  }
+                  if (changed) {
+                    first = false;
+                    cb({
+                      docs: Object.values(docs).map((r) => ({ id: r.id, data: () => ({ json: r.json, ts: +r.ts }) })),
+                      metadata: { fromCache: false },
+                    });
+                  }
+                } catch (e) {
+                  if (err) err(e);
+                }
+              };
+              tick();
+              setInterval(tick, CONFIG.pollMs || 4000);
+            },
+          }),
+        };
+      }
+      async function initDb() {
+        let db = null;
+        try {
+          db = await claude.use("db");
+        } catch (e) {}
+        if (!db && CONFIG.supabaseUrl && CONFIG.supabaseKey) db = sbAdapter(CONFIG.supabaseUrl, CONFIG.supabaseKey);
+        if (!db) {
+          U.loading = false;
+          render();
+          return;
+        }
+        DB = db;
+        setTimeout(() => {
+          if (U.loading) {
+            U.loading = false;
+            note("Could not reach the shared database. Showing the data saved on this device.");
+            render();
+          }
+        }, 8000);
+        db.collection("lms").onSnapshot(
+          (snap) => {
+            const hasCore = snap.docs.some((d) => d.id === "core"),
+              legacy = snap.docs.find((d) => d.id === "state"),
+              was = U.loading;
+            if (hasCore && !loaded) {
+              loaded = true;
+              S.sub = {};
+            }
+            snap.docs.forEach(applyDoc);
+            if (!hasCore && !snap.metadata.fromCache && !seeded) {
+              seeded = true;
+              if (legacy) {
+                try {
+                  const o = JSON.parse(legacy.data().json);
+                  if (o && o.users && o.courses) {
+                    S = o;
+                    fix();
+                  }
+                } catch (e) {}
+              }
+              commit();
+            }
+            U.loading = false;
+            lsSave();
+            const a = document.activeElement;
+            if (!was && a && /INPUT|TEXTAREA|SELECT/.test(a.tagName)) return;
+            render();
+          },
+          () => {
+            if (U.loading) {
+              U.loading = false;
+              note("Could not reach the shared database. Showing the data saved on this device.");
+              render();
+            }
+          },
+        );
+      }
+      function note(m, ok) {
+        let t = $("#toast");
+        if (!t) {
+          t = document.createElement("div");
+          t.id = "toast";
+          t.setAttribute("role", "alert");
+          t.style.cssText =
+            "position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:#c23a3a;color:#fff;padding:10px 16px;border-radius:8px;z-index:60;max-width:90vw;box-shadow:0 6px 18px rgba(0,0,0,.3)";
+          document.body.appendChild(t);
+        }
+        t.textContent = m;
+        t.style.background = ok ? "#1b8a57" : "#c23a3a";
+        clearTimeout(t._h);
+        t._h = setTimeout(() => t.remove(), 9000);
+      }
+      async function putSub(key, val) {
+        S.sub[key] = val;
+        lsSave();
+        const ok = await commitNow();
+        if (!ok) {
+          delete S.sub[key];
+          lsSave();
+          note(
+            "Your work was NOT sent to your teacher. Your account may be view-only. Ask for Contributor (edit) access, then try again.",
+          );
+        }
+        render();
+      }
+      async function takeTest(c, id) {
+        const sid = me().id;
+        if (U.busy || sg(c, id, sid).ans) return;
+        U.busy = true;
+        try {
+          const i = C(c).items.find((x) => x.id === id);
+          const ans = i.questions.map((q, n) => {
+            if (q.t === "ms") return [...document.querySelectorAll(`input[name=q${n}]:checked`)].map((x) => x.value);
+            if (q.t === "mc" || q.t === "tf") {
+              const r = document.querySelector(`input[name=q${n}]:checked`);
+              return r ? r.value : "";
+            }
+            return document.querySelector(`[name=q${n}]`).value;
+          });
+          const award = i.questions.map((q, n) => auto(q, ans[n]));
+          await putSub(c + ":" + id + ":" + sid, { ans, award, grade: finalGrade(award) });
+        } finally {
+          U.busy = false;
+        }
+      }
+      function retake(c, i, sid) {
+        delete S.sub[c + ":" + i + ":" + sid];
+        U.rev = null;
+        save();
+        render();
+      }
+      const DEFSCALE = [
+        { l: "A", min: 90 },
+        { l: "B", min: 80 },
+        { l: "C", min: 70 },
+        { l: "D", min: 60 },
+        { l: "F", min: 0 },
+      ];
+      const scl = () => S.school.scale || (S.school.scale = DEFSCALE.map((x) => ({ ...x })));
+      function gradeLetter(p) {
+        const sc = (S.school.scale && S.school.scale.length ? S.school.scale : DEFSCALE)
+            .slice()
+            .sort((a, b) => b.min - a.min),
+          f = sc.find((x) => p >= x.min);
+        return f ? f.l : sc[sc.length - 1].l;
+      }
+      function setScale(n, f, val) {
+        const s = scl();
+        if (f === "min") s[n].min = Math.max(0, Math.min(100, +val || 0));
+        else s[n].l = val.trim() || s[n].l;
+        s.sort((a, b) => b.min - a.min);
+        save();
+        render();
+      }
+      function addScale() {
+        const l = v("#sl"),
+          m = $("#sm").value;
+        if (!l || m === "") return;
+        scl().push({ l, min: Math.max(0, Math.min(100, +m || 0)) });
+        scl().sort((a, b) => b.min - a.min);
+        save();
+        render();
+      }
+      function delScale(n) {
+        const s = scl();
+        if (s.length > 1) s.splice(n, 1);
+        save();
+        render();
+      }
+      function scaleAdmin() {
+        const s = (S.school.scale || DEFSCALE).slice().sort((a, b) => b.min - a.min);
+        const low =
+          s[s.length - 1].min > 0
+            ? '<p class="bad">No row starts at 0%, so very low grades will show the lowest letter.</p>'
+            : "";
+        return `<div class="card"><h3>Grading scale</h3><p class="mut">A student gets the first letter whose minimum percentage they reach.</p>
+${s.map((x, n) => `<div class="item"><input value="${esc(x.l)}" style="width:80px" aria-label="Letter grade" onchange="setScale(${n},'l',this.value)"><label>from <input type="number" min="0" max="100" value="${x.min}" style="width:80px" aria-label="Minimum percent" onchange="setScale(${n},'min',this.value)"> %</label><button class="btn x" onclick="delScale(${n})">Remove</button></div>`).join("")}
+${low}<div class="row"><input id="sl" placeholder="Letter (e.g. A+)" style="width:130px"><input id="sm" type="number" min="0" max="100" placeholder="Min %" style="width:90px"><button class="btn" onclick="addScale()">Add grade</button><button class="btn x" onclick="delete S.school.scale;save();render()">Reset to A–F</button></div></div>`;
+      }
+      function parseDrive(u) {
+        let x;
+        try {
+          x = new URL(String(u).trim());
+        } catch (e) {
+          return null;
+        }
+        if (x.protocol !== "https:") return null;
+        const h = x.hostname;
+        let m;
+        if (h === "docs.google.com" && (m = x.pathname.match(/^\/(document|spreadsheets|presentation)\/d\/([\w-]+)/)))
+          return { kind: m[1], id: m[2] };
+        if (h === "drive.google.com") {
+          if ((m = x.pathname.match(/^\/file\/d\/([\w-]+)/))) return { kind: "file", id: m[1] };
+          if (x.pathname === "/open" && /^[\w-]+$/.test(x.searchParams.get("id") || ""))
+            return { kind: "file", id: x.searchParams.get("id") };
+          if ((m = x.pathname.match(/\/folders\/([\w-]+)/))) return { kind: "folder", id: m[1] };
+        }
+        return null;
+      }
+      function driveUrl(d, act) {
+        const b = {
+          document: "https://docs.google.com/document/d/",
+          spreadsheets: "https://docs.google.com/spreadsheets/d/",
+          presentation: "https://docs.google.com/presentation/d/",
+        }[d.kind];
+        if (b) return b + d.id + ({ copy: "/copy", edit: "/edit", view: "/preview" }[act] || "/preview");
+        if (d.kind === "folder") return "https://drive.google.com/drive/folders/" + d.id;
+        return "https://drive.google.com/file/d/" + d.id + "/view";
+      }
+      const DM = {
+        view: "Students can view the file",
+        edit: "Students can edit the same file",
+        copy: "Each student gets their own copy",
+      };
+
+      // ---- Google Drive (optional, needs CONFIG.googleClientId; works on your own website, not inside Claude) ----
+      const G = { tok: "", exp: 0 },
+        GKIND = {
+          "application/vnd.google-apps.document": "document",
+          "application/vnd.google-apps.spreadsheet": "spreadsheets",
+          "application/vnd.google-apps.presentation": "presentation",
+        },
+        copyUrl = (d, cp) => driveUrl({ kind: d.kind, id: cp.id }, "edit");
+      const loadScript = (src) =>
+        new Promise((res, rej) => {
+          if (document.querySelector(`script[src="${src}"]`)) return res();
+          const s = document.createElement("script");
+          s.src = src;
+          s.async = true;
+          s.onload = res;
+          s.onerror = () => rej(new Error("Could not load Google scripts. This only works on your own website."));
+          document.head.appendChild(s);
+        });
+      async function gToken() {
+        if (!CONFIG.googleClientId) throw new Error("Google is not set up. Add googleClientId to CONFIG.");
+        if (G.tok && Date.now() < G.exp - 60000) return G.tok;
+        await loadScript("https://accounts.google.com/gsi/client");
+        return new Promise((res, rej) => {
+          const c = google.accounts.oauth2.initTokenClient({
+            client_id: CONFIG.googleClientId,
+            scope: "https://www.googleapis.com/auth/drive.file",
+            callback: (r) => {
+              if (r.error) return rej(new Error(r.error));
+              G.tok = r.access_token;
+              G.exp = Date.now() + (+r.expires_in || 3600) * 1000;
+              res(G.tok);
+            },
+            error_callback: (e) => rej(new Error((e && e.type) || "Google sign-in was closed")),
+          });
+          c.requestAccessToken({ prompt: G.tok ? "" : "consent" });
+        });
+      }
+      async function pickFromDrive() {
+        try {
+          if (!CONFIG.googleApiKey || !CONFIG.googleAppId)
+            throw new Error("Add googleApiKey and googleAppId to CONFIG first.");
+          const t = await gToken();
+          await loadScript("https://apis.google.com/js/api.js");
+          await new Promise((r) => gapi.load("picker", r));
+          const f = await new Promise((res) => {
+            const view = new google.picker.DocsView()
+              .setIncludeFolders(false)
+              .setMimeTypes(Object.keys(GKIND).join(","));
+            new google.picker.PickerBuilder()
+              .addView(view)
+              .setOAuthToken(t)
+              .setDeveloperKey(CONFIG.googleApiKey)
+              .setAppId(CONFIG.googleAppId)
+              .setCallback((d) => {
+                if (d.action === "picked") res(d.docs[0]);
+                else if (d.action === "cancel") res(null);
+              })
+              .build()
+              .setVisible(true);
+          });
+          if (!f) return;
+          const kind = GKIND[f.mimeType];
+          if (!kind) throw new Error("Pick a Google Doc, Sheet or Slides file.");
+          U.picked = { id: f.id, kind, name: f.name };
+          if ($("#f6")) $("#f6").value = driveUrl(U.picked, "edit");
+          if ($("#f7")) $("#f7").value = "auto";
+          note("Selected: " + f.name, true);
+        } catch (e) {
+          note("Google Drive: " + e.message);
+        }
+      }
+      async function makeCopies(cid, iid) {
+        if (U.gbusy) return;
+        U.gbusy = true;
+        try {
+          const c = C(cid),
+            i = c.items.find((x) => x.id === iid),
+            d = i.drive,
+            tok = await gToken(),
+            H = { Authorization: "Bearer " + tok, "Content-Type": "application/json" },
+            api = "https://www.googleapis.com/drive/v3/files/";
+          d.copies = d.copies || {};
+          let made = 0,
+            noMail = 0;
+          for (const sid of c.enrolled) {
+            const u = S.users.find((x) => x.id === sid);
+            if (!u) continue;
+            let cp = d.copies[sid];
+            if (!cp) {
+              const r = await fetch(api + d.id + "/copy?fields=id", {
+                method: "POST",
+                headers: H,
+                body: JSON.stringify({ name: i.title + " - " + u.name }),
+              });
+              if (!r.ok)
+                throw new Error(
+                  "Could not copy the file (error " +
+                    r.status +
+                    "). Pick the file again with Choose from Google Drive.",
+                );
+              cp = d.copies[sid] = { id: (await r.json()).id, shared: false };
+              made++;
+            }
+            if (!cp.shared) {
+              if (u.email) {
+                const p = await fetch(api + cp.id + "/permissions?sendNotificationEmail=false", {
+                  method: "POST",
+                  headers: H,
+                  body: JSON.stringify({ role: "writer", type: "user", emailAddress: u.email }),
+                });
+                cp.shared = p.ok;
+                if (!p.ok) noMail++;
+              } else noMail++;
+            }
+          }
+          save();
+          render();
+          note(
+            `${made} new cop${made === 1 ? "y" : "ies"} made.` +
+              (noMail
+                ? ` ${noMail} student${noMail === 1 ? "" : "s"} not shared yet (add their Google email on the Admin page, then run this again).`
+                : " Everyone has access."),
+            !noMail,
+          );
+        } catch (e) {
+          note("Google Drive: " + e.message);
+        } finally {
+          U.gbusy = false;
+        }
+      }
+      const DMX = { auto: "Each student gets their own copy (automatic)" };
+      function asgView(c, i, sb) {
+        const d = i.drive,
+          sid = me().id,
+          cp = d && d.copies && d.copies[sid],
+          auto = d && d.mode === "auto",
+          a = (href, label, cls) =>
+            `<a class="btn${cls ? " x" : ""}" style="text-decoration:none;${cls ? "color:var(--ink)" : ""}" href="${esc(href)}" target="_blank" rel="noopener noreferrer">${label}</a>`;
+        let h = `<p class="mut">${pts(i)} points · due ${esc(i.due)}</p><p style="white-space:pre-wrap">${esc(i.text)}</p>`;
+        if (d) {
+          h += `<div class="card" style="background:var(--bg)"><b>📎 Google Drive file</b> <span class="pill">${DM[d.mode] || DMX[d.mode]}</span><div class="row">`;
+          if (auto && !staff())
+            h += cp
+              ? a(copyUrl(d, cp), "Open my copy")
+              : '<span class="mut">Your teacher has not made your copy yet.</span>';
+          else {
+            if (d.mode === "copy" && !staff()) h += a(driveUrl(d, "copy"), "Make my copy");
+            h += a(
+              driveUrl(d, d.mode === "edit" ? "edit" : "view"),
+              d.mode === "edit" ? "Open and edit" : "Open file",
+              true,
+            );
+          }
+          if (auto && staff() && CONFIG.googleClientId)
+            h += `<button class="btn" onclick="makeCopies('${c.id}','${i.id}')">Create / share student copies</button>`;
+          h += "</div>";
+          if (!staff() && d.mode === "edit") h += '<p class="mut">Everyone works in the same file.</p>';
+          if (!staff() && d.mode === "copy")
+            h +=
+              '<p class="mut">Google will ask you to make a copy. Then paste the link to your copy below when you turn in.</p>';
+          if (!staff() && auto && cp && !cp.shared)
+            h += '<p class="mut">Ask your teacher to add your Google email so you can open your copy.</p>';
+          if (staff() && auto)
+            h += `<p class="mut">${c.enrolled.filter((x) => d.copies && d.copies[x]).length} of ${c.enrolled.length} student copies made.</p>`;
+          if (staff() && !auto)
+            h +=
+              '<p class="mut">Make sure this file is shared with "Anyone with the link" so students can open it.</p>';
+          h += "</div>";
+        }
+        if (staff())
+          return (
+            h +
+            c.enrolled
+              .map((id) => {
+                const s = sg(c.id, i.id, id),
+                  done = s.text || s.link,
+                  k = d && d.copies && d.copies[id];
+                return `<div class="item" style="display:block"><b>${esc(nm(id))}</b> ${done ? '<span class="ok">Submitted</span>' : '<span class="mut">Not submitted</span>'}${k ? `<div>Their copy: <a href="${esc(copyUrl(d, k))}" target="_blank" rel="noopener noreferrer">open</a>${k.shared ? "" : ' <span class="mut">(not shared with them yet)</span>'}</div>` : ""}${s.link && !k ? `<div><a href="${esc(s.link)}" target="_blank" rel="noopener noreferrer">${esc(s.link)}</a></div>` : ""}${s.text ? `<div style="white-space:pre-wrap">${esc(s.text)}</div>` : ""}</div>`;
+              })
+              .join("")
+          );
+        if (sb.text || sb.link)
+          return (
+            h +
+            `<p class="ok">Turned in</p>${sb.link ? `<p><a href="${esc(sb.link)}" target="_blank" rel="noopener noreferrer">Your file</a></p>` : ""}${sb.text ? `<p style="white-space:pre-wrap">${esc(sb.text)}</p>` : ""}<p>${hasG(sb.grade) ? `Grade: <b>${sb.grade}/${i.pts}</b>` : '<span class="mut">Waiting for a grade</span>'}</p>`
+          );
+        if (auto)
+          return (
+            h +
+            `<p class="mut">Do your work in your copy, then turn in.</p><div class="row"><button class="btn" onclick="turnIn('${c.id}','${i.id}')">Turn in</button></div>`
+          );
+        return (
+          h +
+          `<input id="sl2" placeholder="${d && d.mode === "copy" ? "Link to your copy (Google Drive)" : "Link to your work (Google Drive, optional)"}" style="width:100%;margin-bottom:6px"><div class="mut" style="margin-bottom:8px">Share your file so your teacher can open it.</div><textarea id="sb" placeholder="Type your answer (optional if you add a link)"></textarea><div class="row"><button class="btn" onclick="turnIn('${c.id}','${i.id}')">Turn in</button></div>`
+        );
+      }
+      async function turnIn(c, i) {
+        const sid = me().id,
+          t = ($("#sb") || { value: "" }).value.trim(),
+          lk = ($("#sl2") || { value: "" }).value.trim(),
+          it = C(c).items.find((x) => x.id === i);
+        let link = "";
+        if (it.drive && it.drive.mode === "auto") {
+          const cp = it.drive.copies && it.drive.copies[sid];
+          if (!cp) {
+            note("Your copy is not ready yet. Ask your teacher.");
+            return;
+          }
+          link = copyUrl(it.drive, cp);
+        } else if (lk) {
+          const d = parseDrive(lk);
+          if (!d) {
+            note("Paste a Google Drive, Docs, Sheets or Slides link.");
+            return;
+          }
+          link = driveUrl(
+            d,
+            d.kind === "document" || d.kind === "spreadsheets" || d.kind === "presentation" ? "edit" : "view",
+          );
+        }
+        const old = sg(c, i, sid);
+        if ((!t && !link) || U.busy || old.text || old.link) return;
+        U.busy = true;
+        try {
+          await putSub(c + ":" + i + ":" + sid, { text: t, link, grade: "" });
+        } finally {
+          U.busy = false;
+        }
+      }
+      function fail(e) {
+        console.error(e);
+        $("#main").innerHTML =
+          `<div class="card"><h3 class="bad">Something went wrong</h3><pre style="white-space:pre-wrap">${esc(e && e.stack ? e.stack.split("\n").slice(0, 4).join("\n") : String(e))}</pre><div class="row"><button class="btn" onclick="U.view='home';U.item=null;U.pick=null;render()">Back to Home</button><button class="btn x" onclick="signOut()">Sign out</button><button class="btn x" onclick="resetAll()">Reset all data</button></div><p class="mut">Reset all data deletes every course, account and grade and starts over with the sample data.</p></div>`;
+      }
+      async function resetAll() {
+        try {
+          localStorage.removeItem(K);
+          localStorage.removeItem("lms_user");
+        } catch (e) {}
+        S = seed();
+        fix();
+        last = {};
+        await commitNow();
+        location.reload();
+      }
+      function render() {
+        try {
+          renderMain();
+        } catch (e) {
+          fail(e);
+        }
+      }
+      function renderMain() {
+        if (U.loading) {
+          $("#sn").textContent = "";
+          $("#nav").innerHTML = "";
+          $("#me").textContent = "";
+          $("#so").hidden = true;
+          $("#modal").innerHTML = "";
+          $("#main").innerHTML =
+            '<div class="card" style="max-width:380px;margin:60px auto;text-align:center"><p class="mut">Loading your school…</p></div>';
+          return;
+        }
+        if (U.user && !S.users.some((u) => u.id === U.user)) U.user = null;
+        if (!U.user) {
+          brand();
+          loginBg();
+          $("#nav").innerHTML = "";
+          $("#me").textContent = "";
+          $("#so").hidden = true;
+          $("#main").innerHTML = login();
+          $("#modal").innerHTML = "";
+          return;
+        }
+        document.body.style.background = "";
+        U.role = S.users.find((u) => u.id === U.user).role;
+        $("#so").hidden = false;
+        renderApp();
+        $("#me").textContent = me().name + " · " + U.role;
+      }
+      const QT = {
+        mc: "Multiple choice",
+        tf: "True / False",
+        ms: "Multiple select",
+        sa: "Short answer",
+        num: "Number",
+        essay: "Essay (graded by hand)",
+      };
+      const qp = (q) => +(q.pts ?? 1) || 0,
+        norm = (x) =>
+          String(x ?? "")
+            .trim()
+            .toLowerCase(),
+        showA = (a) => (Array.isArray(a) ? a.join(", ") : String(a ?? "")),
+        ans2s = (q) =>
+          Array.isArray(q.a) ? q.a.join(", ") : q.t === "num" && q.tol ? q.a + " ± " + q.tol : String(q.a),
+        finalGrade = (aw) =>
+          aw.some((x) => x === null) ? "" : String(Math.round(aw.reduce((a, x) => a + x, 0) * 100) / 100);
+      const plural = (n) => (n == 1 ? "" : "s");
+      function auto(q, a) {
+        const m = qp(q);
+        if (q.t === "essay") return null;
+        if (q.t === "ms") {
+          const c = (q.a || []).map(norm).sort().join("|"),
+            g = (Array.isArray(a) ? a : []).map(norm).sort().join("|");
+          return c === g ? m : 0;
+        }
+        if (q.t === "num") {
+          const x = parseFloat(a),
+            y = parseFloat(q.a);
+          return !isNaN(x) && Math.abs(x - y) <= (+q.tol || 0) + 1e-9 ? m : 0;
+        }
+        if (q.t === "sa") return (Array.isArray(q.a) ? q.a : [q.a]).some((z) => norm(z) === norm(a)) ? m : 0;
+        return norm(a) === norm(q.a) ? m : 0;
+      }
+      const awards = (i, sb) =>
+        i.questions.map((q, n) => (sb.award && sb.award[n] !== undefined ? sb.award[n] : auto(q, (sb.ans || [])[n])));
+
+      function qform(c, i) {
+        const d = U.qd || {},
+          t = U.qt || "mc";
+        const hint = {
+          mc: "Correct option (type it exactly)",
+          ms: "Correct options, comma separated",
+          sa: "Accepted answers, comma separated",
+          num: "Correct number",
+        };
+        let ans = "";
+        if (t === "tf")
+          ans = `<select id="qa" aria-label="Correct answer"><option${d.a === "False" ? "" : " selected"}>True</option><option${d.a === "False" ? " selected" : ""}>False</option></select>`;
+        else if (t !== "essay")
+          ans = `<input id="qa" placeholder="${hint[t]}" value="${esc(d.a || "")}" style="flex:1;min-width:220px">`;
+        if (t === "num")
+          ans += `<label>± <input id="qx" type="number" step="any" min="0" value="${d.x ?? 0}" style="width:80px"></label>`;
+        return `<div class="card" style="background:var(--bg)"><h3>Add a question</h3>
+<div class="row"><select id="qt" aria-label="Question type" onchange="qType(this.value)">${Object.keys(QT)
+          .map((k) => `<option value="${k}"${t === k ? " selected" : ""}>${QT[k]}</option>`)
+          .join("")}</select>
+<label>Points <input id="qp" type="number" step="0.5" min="0" value="${d.p ?? 1}" style="width:80px"></label></div>
+<div class="row"><input id="qq" placeholder="Question" value="${esc(d.q || "")}" style="flex:1;min-width:220px"></div>
+${t === "mc" || t === "ms" ? `<div class="row"><input id="qo" placeholder="Options, comma separated" value="${esc(d.o || "")}" style="flex:1;min-width:220px"></div>` : ""}
+${ans ? `<div class="row">${ans}</div>` : '<p class="mut">Essays have no answer key. You score them by hand under Student responses.</p>'}
+${U.qerr ? `<p class="bad">${esc(U.qerr)}</p>` : ""}
+<div class="row"><button class="btn" onclick="addQ('${c.id}','${i.id}')">Add question</button></div></div>`;
+      }
+      function qType(t) {
+        U.qd = { q: v("#qq"), o: $("#qo") ? v("#qo") : (U.qd || {}).o || "", p: $("#qp").value };
+        U.qt = t;
+        U.qerr = "";
+        render();
+      }
+      function addQ(c, id) {
+        const t = U.qt || "mc",
+          q = v("#qq");
+        let o = [],
+          a = "";
+        const list = (sel) =>
+          v(sel)
+            .split(",")
+            .map((x) => x.trim())
+            .filter(Boolean);
+        if (t === "mc" || t === "ms") o = list("#qo");
+        if (t === "tf") {
+          o = ["True", "False"];
+          a = $("#qa").value;
+        } else if (t === "ms" || t === "sa") a = list("#qa");
+        else if (t !== "essay") a = v("#qa");
+        const bad =
+          !q || ((t === "mc" || t === "ms") && o.length < 2) || (t !== "essay" && (Array.isArray(a) ? !a.length : !a));
+        if (bad) {
+          U.qd = { q, o: $("#qo") ? v("#qo") : "", a: $("#qa") ? $("#qa").value : "", p: $("#qp").value };
+          U.qerr = "Fill in the question, at least two options for choice questions, and the correct answer.";
+          render();
+          return;
+        }
+        const qq = { t, q, opts: o, a, pts: Math.max(0, +$("#qp").value || 0) };
+        if (t === "num") qq.tol = Math.max(0, +$("#qx").value || 0);
+        C(c)
+          .items.find((x) => x.id === id)
+          .questions.push(qq);
+        U.qd = null;
+        U.qerr = "";
+        save();
+        render();
+      }
+      function delQ(c, id, n) {
+        if (Object.keys(S.sub).some((k) => k.startsWith(c + ":" + id + ":") && S.sub[k].ans)) {
+          U.qerr = "You cannot remove questions after students have taken the test.";
+          render();
+          return;
+        }
+        C(c)
+          .items.find((x) => x.id === id)
+          .questions.splice(n, 1);
+        U.qerr = "";
+        save();
+        render();
+      }
+      function qinput(q, n) {
+        const m = qp(q),
+          hd = `<b>${n + 1}. ${esc(q.q)}</b> <span class="mut">(${m} pt${plural(m)})</span>`,
+          lab = (type, o) =>
+            `<label style="display:block;margin-top:4px"><input type="${type}" name="q${n}" value="${esc(o)}"> ${esc(o)}</label>`;
+        let f;
+        if (q.t === "mc" || q.t === "tf") f = q.opts.map((o) => lab("radio", o)).join("");
+        else if (q.t === "ms")
+          f = '<div class="mut">Select all that apply</div>' + q.opts.map((o) => lab("checkbox", o)).join("");
+        else if (q.t === "essay")
+          f = `<textarea name="q${n}" style="margin-top:6px" placeholder="Write your answer"></textarea>`;
+        else
+          f = `<div><input name="q${n}" ${q.t === "num" ? 'type="number" step="any"' : ""} style="margin-top:6px"></div>`;
+        return `<div class="item" style="display:block">${hd}${f}</div>`;
+      }
+      function review(c, i, sid) {
+        const sb = sg(c.id, i.id, sid),
+          aw = awards(i, sb);
+        const btn = (d, label, sign) =>
+          `<button class="btn x" style="color:var(--ink)" aria-label="${label}" onclick="adj('${c.id}','${i.id}','${sid}',@N@,${d})">${sign}</button>`;
+        return (
+          `<div class="card" style="background:var(--bg);margin-top:8px">` +
+          i.questions
+            .map((q, n) => {
+              const a = sb.ans[n],
+                m = qp(q),
+                x = aw[n],
+                b = (d, l, s) => btn(d, l, s).replace("@N@", n);
+              return `<div class="item" style="display:block"><b>${n + 1}. ${esc(q.q)}</b> <span class="mut">(${m} pt${plural(m)} · ${QT[q.t]})</span>
+<div style="margin:6px 0;white-space:pre-wrap">${esc(showA(a)) || '<span class="mut">(blank)</span>'}</div>
+${q.t === "essay" ? "" : `<div class="mut">Correct: ${esc(ans2s(q))}</div>`}
+<div class="row">${b(-0.5, "Subtract half a point", "−")}<input type="number" step="0.5" min="0" max="${m}" value="${x === null ? "" : x}" placeholder="–" style="width:80px" aria-label="Points for question ${n + 1}" onchange="setAward('${c.id}','${i.id}','${sid}',${n},this.value)">${b(0.5, "Add half a point", "+")}<span class="mut">of ${m}</span></div></div>`;
+            })
+            .join("") +
+          `</div>`
+        );
+      }
+      function setAward(c, id, sid, n, val) {
+        const i = C(c).items.find((x) => x.id === id),
+          sb = S.sub[c + ":" + id + ":" + sid];
+        if (!sb) return;
+        const aw = awards(i, sb),
+          m = qp(i.questions[n]);
+        aw[n] = val === "" ? null : Math.max(0, Math.min(m, Math.round((+val || 0) * 100) / 100));
+        sb.award = aw;
+        sb.grade = finalGrade(aw);
+        save();
+        render();
+      }
+      function adj(c, id, sid, n, d) {
+        const i = C(c).items.find((x) => x.id === id),
+          x = awards(i, S.sub[c + ":" + id + ":" + sid])[n];
+        setAward(c, id, sid, n, String((x || 0) + d));
+      }
+      function testView(c, i, sb) {
+        const tot = pts(i);
+        let h = `<p class="mut">${i.questions.length} question${plural(i.questions.length)} · ${tot} point${plural(tot)}</p>`;
+        if (staff()) {
+          h += "<h3>Questions</h3>";
+          h +=
+            i.questions
+              .map(
+                (q, n) =>
+                  `<div class="item"><div style="flex:1"><b>${n + 1}. ${esc(q.q)}</b><div class="mut">${QT[q.t]} · ${qp(q)} pt${plural(qp(q))}${q.opts && q.opts.length ? " · " + esc(q.opts.join(" / ")) : ""}${q.t === "essay" ? " · graded by hand" : " · answer: " + esc(ans2s(q))}</div></div><button class="btn x" onclick="delQ('${c.id}','${i.id}',${n})">Remove</button></div>`,
+              )
+              .join("") || '<p class="mut">No questions yet.</p>';
+          h += qform(c, i);
+          h += '<h3 style="margin-top:16px">Student responses</h3>';
+          h += c.enrolled
+            .map((id) => {
+              const s = sg(c.id, i.id, id);
+              const right = s.ans
+                ? `<span class="${hasG(s.grade) ? "" : "bad"}">${hasG(s.grade) ? s.grade + "/" + tot : "Needs grading"}</span><button class="btn" onclick="U.rev=U.rev==='${id}'?null:'${id}';render()">${U.rev === id ? "Close" : "Review"}</button><button class="btn x" onclick="retake('${c.id}','${i.id}','${id}')">Allow retake</button>`
+                : '<span class="mut">Not taken</span>';
+              return `<div class="item"><b style="flex:1">${esc(nm(id))}</b>${right}</div>${U.rev === id && s.ans ? review(c, i, id) : ""}`;
+            })
+            .join("");
+          return h;
+        }
+        if (sb.ans) {
+          const aw = awards(i, sb);
+          h += hasG(sb.grade)
+            ? `<p>Score: <b>${sb.grade}/${tot}</b></p>`
+            : '<p class="mut">Submitted. Your teacher still needs to grade some questions.</p>';
+          return (
+            h +
+            i.questions
+              .map((q, n) => {
+                const x = aw[n];
+                return `<div class="item" style="display:block"><b>${n + 1}. ${esc(q.q)}</b><div class="mut" style="white-space:pre-wrap">Your answer: ${esc(showA(sb.ans[n])) || "(blank)"}</div>${x === null ? '<div class="mut">Waiting for grade</div>' : `<div class="${x >= qp(q) ? "ok" : x > 0 ? "" : "bad"}">${x}/${qp(q)} pts</div>`}${q.t !== "essay" && x !== null && x < qp(q) ? `<div class="mut">Correct: ${esc(ans2s(q))}</div>` : ""}</div>`;
+              })
+              .join("")
+          );
+        }
+        if (!i.questions.length) return h + '<p class="mut">This test has no questions yet.</p>';
+        return (
+          h +
+          i.questions.map(qinput).join("") +
+          `<div class="row"><button class="btn" onclick="takeTest('${c.id}','${i.id}')">Submit test</button></div>`
+        );
+      }
+      function fix() {
+        S.groups.forEach((g) => {
+          g.admins = g.admins || [];
+          g.res = g.res || [];
+        });
+        if (S.school.name === "🏫 Schoolhouse") S.school.name = "Tundra Academy";
+        const used = new Set(S.users.map((u) => u.un).filter(Boolean));
+        S.users.forEach((u) => {
+          if (u.un) return;
+          const t = u.name.split(" "),
+            first = (/^(Ms|Mr|Mrs|Dr)\.?$/.test(t[0]) ? t[1] : t[0]) || "user",
+            b = u.role === "admin" ? "admin" : first.toLowerCase().replace(/[^a-z0-9]/g, "") || "user";
+          let n = b,
+            k = 1;
+          while (used.has(n)) n = b + ++k;
+          used.add(n);
+          u.un = n;
+          u.pw = u.role === "admin" ? "admin" : "welcome1";
+        });
+        const a = S.users.find((u) => u.role === "admin" && u.un === "principal" && u.pw === "admin");
+        if (a && !S.users.some((u) => u.un === "admin")) a.un = "admin";
+      }
+      function renderApp() {
+        const sp = $("#pl"),
+          st = sp ? sp.scrollTop : 0;
+        document.documentElement.style.setProperty("--nav", S.school.color);
+        brand();
+
+        const n = [
+          ["home", "Home"],
+          ["courses", "Courses"],
+          ["groups", "Groups"],
+          ["grades", "Grades"],
+        ];
+        if (U.role === "admin") n.push(["admin", "Admin"]);
+        $("#nav").innerHTML = n
+          .map(
+            (x) =>
+              `<button class="${U.view === x[0] || ((U.view === "course" || U.view === "mycourses") && x[0] === "courses") || (U.view === "mygroups" && x[0] === "groups") ? "on" : ""}" onclick="U.gid=null;go('${x[0]}')">${x[1]}</button>`,
+          )
+          .join("");
+        $("#main").innerHTML = {
+          home,
+          courses: enr,
+          mycourses: myCourses,
+          course,
+          groups: groups2,
+          mygroups: myGroups,
+          grades,
+          admin,
+        }[U.view]();
+        $("#modal").innerHTML = modal();
+        if ($("#pl")) $("#pl").scrollTop = st;
+      }
+      render();
+      initDb();
+    </script>
+  </body>
+</html>
