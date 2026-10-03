@@ -477,10 +477,13 @@
   <body>
     <header>
       <b id="sn"></b><span id="nav" style="display: contents"></span><span class="sp"></span>
-      <span id="me" style="color: #c9d4ec; font-size: 14px"></span><button id="so" onclick="signOut()">Sign out</button>
+      <button id="sync" type="button" style="font-size: 13px"></button
+      ><span id="me" style="color: #c9d4ec; font-size: 14px"></span
+      ><button id="so" onclick="signOut()">Sign out</button>
     </header>
     <main id="main"></main>
     <div id="modal"></div>
+    <script src="config.js"></script>
     <script>
       addEventListener("error", function (e) {
         var m = document.getElementById("main");
@@ -498,7 +501,7 @@
     <script>
       /* ===== SETTINGS YOU CAN EDIT =====
    To share accounts and data between computers (for example on GitHub Pages), create a free
-   Supabase project, run the SQL below in its SQL Editor, then paste your Project URL and anon key here.
+   Supabase project, run the SQL below in its SQL Editor, then paste your Project URL and anon key here, or put them in config.js next to this file (config.js wins).
    Leave both empty to keep everything in this browser only.
 
    create table lms_docs (id text primary key, json text not null, ts bigint not null);
@@ -507,15 +510,18 @@
    create policy "open insert" on lms_docs for insert with check (true);
    create policy "open update" on lms_docs for update using (true) with check (true);
 */
-      const CONFIG = {
-        supabaseUrl: "",
-        supabaseKey: "",
-        pollMs: 4000,
-        // Google Drive (see README): lets teachers pick a file and make a copy for every student.
-        googleClientId: "",
-        googleApiKey: "",
-        googleAppId: "",
-      };
+      const CONFIG = Object.assign(
+        {
+          supabaseUrl: "",
+          supabaseKey: "",
+          pollMs: 4000,
+          // Google Drive (see README): lets teachers pick a file and make a copy for every student.
+          googleClientId: "",
+          googleApiKey: "",
+          googleAppId: "",
+        },
+        window.APP_CONFIG || {},
+      );
       const K = "schoolhouse_v2",
         $ = (s) => document.querySelector(s),
         uid = () => Math.random().toString(36).slice(2, 8);
@@ -1405,6 +1411,7 @@ ${staff() ? `<div class="card"><h3>Manage members</h3><div class="row" style="ma
             delete last[keys[n]];
           }
         });
+        if (!ok) setSync("err", "Could not save to the shared database.");
         if (!ok)
           note(
             "Not saved to the shared database. Your account may be view-only. Ask the course owner for Contributor (edit) access.",
@@ -1442,8 +1449,30 @@ ${staff() ? `<div class="card"><h3>Manage members</h3><div class="row" style="ma
       }
       // Optional shared backend (Supabase REST). Gives every device the same accounts and data.
       function sbAdapter(url, key) {
-        const H = { apikey: key, Authorization: "Bearer " + key, "Content-Type": "application/json" },
+        url = String(url)
+          .trim()
+          .replace(/\/rest\/v1\/?$/, "")
+          .replace(/\/+$/, "");
+        key = String(key).trim();
+        const H = {
+            apikey: key,
+            ...(key.startsWith("sb_") ? {} : { Authorization: "Bearer " + key }),
+            "Content-Type": "application/json",
+          },
           base = url.replace(/\/$/, "") + "/rest/v1/lms_docs";
+        const sbGet = async (u) => {
+          const r = await fetch(u, { headers: H }),
+            b = await r.json().catch(() => null);
+          if (!r.ok || !Array.isArray(b)) {
+            const raw = (b && (b.message || b.error)) || "HTTP " + r.status;
+            throw new Error(
+              /lms_docs|PGRST205|relation/i.test(raw + JSON.stringify(b || {}))
+                ? "The lms_docs table was not found. Run the SQL step from the README."
+                : raw + (b && b.hint ? " (" + b.hint + ")" : ""),
+            );
+          }
+          return b;
+        };
         return {
           doc: (p) => ({
             set: async (d) => {
@@ -1452,25 +1481,24 @@ ${staff() ? `<div class="card"><h3>Manage members</h3><div class="row" style="ma
                 headers: { ...H, Prefer: "resolution=merge-duplicates,return=minimal" },
                 body: JSON.stringify([{ id: p.split("/")[1], json: d.json, ts: d.ts }]),
               });
-              if (!r.ok) throw new Error("save failed " + r.status);
+              if (!r.ok) {
+                const b = await r.json().catch(() => null);
+                throw new Error("Save failed: " + ((b && (b.message || b.hint)) || "HTTP " + r.status));
+              }
             },
           }),
           collection: () => ({
-            onSnapshot: (cb, err) => {
+            onSnapshot: (cb, err, okCb) => {
               const docs = {};
               let first = true;
               const tick = async () => {
                 try {
-                  const l = await (await fetch(base + "?select=id,ts", { headers: H })).json();
-                  if (!Array.isArray(l)) throw new Error("bad response");
+                  const l = await sbGet(base + "?select=id,ts");
                   const need = l.filter((x) => !docs[x.id] || +docs[x.id].ts < +x.ts);
                   let changed = first;
                   if (need.length) {
                     const q = need.map((x) => '"' + x.id + '"').join(",");
-                    const rows = await (
-                      await fetch(base + "?select=id,json,ts&id=in.(" + encodeURIComponent(q) + ")", { headers: H })
-                    ).json();
-                    if (!Array.isArray(rows)) throw new Error("bad response");
+                    const rows = await sbGet(base + "?select=id,json,ts&id=in.(" + encodeURIComponent(q) + ")");
                     rows.forEach((r) => (docs[r.id] = r));
                     changed = true;
                   }
@@ -1481,6 +1509,7 @@ ${staff() ? `<div class="card"><h3>Manage members</h3><div class="row" style="ma
                       metadata: { fromCache: false },
                     });
                   }
+                  if (okCb) okCb();
                 } catch (e) {
                   if (err) err(e);
                 }
@@ -1498,6 +1527,7 @@ ${staff() ? `<div class="card"><h3>Manage members</h3><div class="row" style="ma
         } catch (e) {}
         if (!db && CONFIG.supabaseUrl && CONFIG.supabaseKey) db = sbAdapter(CONFIG.supabaseUrl, CONFIG.supabaseKey);
         if (!db) {
+          setSync("off", syncWhy());
           U.loading = false;
           render();
           return;
@@ -1506,6 +1536,7 @@ ${staff() ? `<div class="card"><h3>Manage members</h3><div class="row" style="ma
         setTimeout(() => {
           if (U.loading) {
             U.loading = false;
+            setSync("err", "Timed out reaching the shared database.");
             note("Could not reach the shared database. Showing the data saved on this device.");
             render();
           }
@@ -1534,17 +1565,25 @@ ${staff() ? `<div class="card"><h3>Manage members</h3><div class="row" style="ma
               commit();
             }
             U.loading = false;
+            setSync("ok");
             lsSave();
             const a = document.activeElement;
             if (!was && a && /INPUT|TEXTAREA|SELECT/.test(a.tagName)) return;
             render();
           },
-          () => {
+          (e) => {
+            if (e) setSync("err", e.message || "Could not reach the shared database.");
+            if (e && e.message && Date.now() - (U.lastErr || 0) > 30000) {
+              U.lastErr = Date.now();
+              note("Shared database: " + e.message + (U.loading ? " Showing the data saved on this device." : ""));
+            }
             if (U.loading) {
               U.loading = false;
-              note("Could not reach the shared database. Showing the data saved on this device.");
               render();
             }
+          },
+          () => {
+            if (U.sync && U.sync.state === "err") setSync("ok");
           },
         );
       }
@@ -1915,6 +1954,32 @@ ${low}<div class="row"><input id="sl" placeholder="Letter (e.g. A+)" style="widt
           U.busy = false;
         }
       }
+      function setSync(state, msg) {
+        U.sync = { state, msg: msg || "" };
+        syncChip();
+      }
+      function syncWhy() {
+        if (window.claude && !DB) return "Connecting to the shared database...";
+        if (!CONFIG.supabaseUrl || !CONFIG.supabaseKey)
+          return (
+            (window.APP_CONFIG
+              ? "supabaseUrl or supabaseKey is empty in config.js."
+              : "config.js was not loaded. Make sure it is uploaded next to index.html, then hard refresh.") +
+            " Data is only saved on this device."
+          );
+        return "Not connected yet.";
+      }
+      function syncChip() {
+        const el = $("#sync");
+        if (!el) return;
+        const st = U.sync || { state: U.loading ? "wait" : "off", msg: syncWhy() },
+          col = { ok: "#3cc28a", err: "#ef6b6b", off: "#f0b429", wait: "#b8c2d8" }[st.state],
+          txt = { ok: "Synced", err: "Sync error", off: "This device only", wait: "Connecting..." }[st.state];
+        el.innerHTML = `<span style="color:${col}">●</span> ${txt}`;
+        el.title = st.msg || "";
+        el.onclick = () =>
+          note(st.state === "ok" ? "Connected to the shared database." : st.msg || txt, st.state === "ok");
+      }
       function fail(e) {
         console.error(e);
         $("#main").innerHTML =
@@ -1934,6 +1999,7 @@ ${low}<div class="row"><input id="sl" placeholder="Letter (e.g. A+)" style="widt
       function render() {
         try {
           renderMain();
+          syncChip();
         } catch (e) {
           fail(e);
         }
