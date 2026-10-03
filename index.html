@@ -217,8 +217,7 @@ function fix(){S.groups.forEach(g=>{g.admins=g.admins||[];g.res=g.res||[]});
 if(S.school.name==='🏫 Schoolhouse')S.school.name='Tundra Academy';
 const used=new Set(S.users.map(u=>u.un).filter(Boolean));
 S.users.forEach(u=>{if(!u.un){const t=u.name.split(' '),b=((/^(Ms|Mr|Mrs|Dr)\.?$/.test(t[0])?t[1]:t[0])||'user').toLowerCase().replace(/[^a-z0-9]/g,'')||'user';let n=b,i=1;while(used.has(n))n=b+(++i);used.add(n);u.un=n;u.pw=u.role==='admin'?'admin':'welcome1'}})}
-function pushDb(){if(!DB)return;clearTimeout(tm);tm=setTimeout(()=>{const j=JSON.stringify(S);if(j===lastJ)return;lastJ=j;DB.set({json:j}).catch(()=>{})},400)}
-async function initDb(){try{const db=await claude.use('db');if(!db)return;DB=db.doc('lms/state');
+function pushDb(){if(!DB)return;clearTimeout(tm);tm=setTimeout(()=>{const j=JSON.stringify(S);if(j===lastJ)return;lastJ=j;DB.set({json:j}).catch(()=>{})},400)};
 DB.onSnapshot(snap=>{if(snap.exists){const j=snap.data().json;if(j===lastJ)return;lastJ=j;try{S=JSON.parse(j);fix()}catch(e){return}const a=document.activeElement;if(a&&/INPUT|TEXTAREA|SELECT/.test(a.tagName))return;render()}else if(!snap.metadata.fromCache){lastJ=JSON.stringify(S);DB.set({json:lastJ}).catch(()=>{})}},()=>{})}catch(e){}}
 function brand(){document.documentElement.style.setProperty('--nav',S.school.color);$('#sn').innerHTML=`<img src="${logo()}" alt="" style="height:30px;width:30px;object-fit:cover;border-radius:6px;vertical-align:middle;margin-right:8px">${esc(S.school.name)}`}
 function login(){const ad=S.users.some(u=>u.role==='admin'&&u.pw==='admin');
