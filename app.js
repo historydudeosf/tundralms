@@ -660,7 +660,9 @@ async function initDb() {
           if (j === lastJ) return;
           lastJ = j;
           try {
-            S = JSON.parse(j);
+            const o = JSON.parse(j);
+            if (!o || !o.users || !o.courses || !o.groups || !o.school || !o.sub) return;
+            S = o;
             fix();
           } catch (e) {
             return;
@@ -786,7 +788,32 @@ function del(k, id) {
   save();
   render();
 }
+function fail(e) {
+  console.error(e);
+  $("#main").innerHTML =
+    `<div class="card"><h3 class="bad">Something went wrong</h3><pre style="white-space:pre-wrap">${esc(e && e.stack ? e.stack.split("\n").slice(0, 4).join("\n") : String(e))}</pre><div class="row"><button class="btn" onclick="U.view='home';U.item=null;U.pick=null;render()">Back to Home</button><button class="btn x" onclick="signOut()">Sign out</button><button class="btn x" onclick="resetAll()">Reset all data</button></div><p class="mut">Reset all data deletes every course, account and grade and starts over with the sample data.</p></div>`;
+}
+async function resetAll() {
+  try {
+    localStorage.removeItem(K);
+    sessionStorage.removeItem("lms_user");
+  } catch (e) {}
+  S = seed();
+  fix();
+  if (DB)
+    try {
+      await DB.set({ json: JSON.stringify(S) });
+    } catch (e) {}
+  location.reload();
+}
 function render() {
+  try {
+    renderMain();
+  } catch (e) {
+    fail(e);
+  }
+}
+function renderMain() {
   if (U.user && !S.users.some((u) => u.id === U.user)) U.user = null;
   if (!U.user) {
     brand();
